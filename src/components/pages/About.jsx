@@ -40,20 +40,38 @@ export default function About() {
     {
       name: "Alex Johnson",
       role: "Founder & CEO",
-      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=300&fit=crop&crop=face",
-      bio: "Passionate about connecting creative minds through meaningful competitions."
+      image: "https://images.unsplash.com/photo-1560250097-0b93528c311a?w=300&h=300&fit=crop&crop=face",
+      bio: "Passionate about connecting creative minds through meaningful competitions. 10+ years in tech entrepreneurship."
     },
     {
       name: "Sarah Chen",
       role: "Head of Product",
-      image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=300&h=300&fit=crop&crop=face",
-      bio: "Designing user experiences that inspire creativity and foster community."
+      image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=300&h=300&fit=crop&crop=face",
+      bio: "Designing user experiences that inspire creativity and foster community. Former Google UX designer."
     },
     {
       name: "Michael Rodriguez",
       role: "Lead Developer",
-      image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=300&h=300&fit=crop&crop=face",
-      bio: "Building robust, scalable solutions that power creative competitions."
+      image: "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=300&h=300&fit=crop&crop=face",
+      bio: "Building robust, scalable solutions that power creative competitions. Full-stack expert with 8+ years experience."
+    },
+    {
+      name: "Emily Watson",
+      role: "Community Manager",
+      image: "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=300&h=300&fit=crop&crop=face",
+      bio: "Fostering vibrant creator communities and ensuring fair contest experiences for all participants."
+    },
+    {
+      name: "David Kim",
+      role: "Head of Marketing",
+      image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=300&fit=crop&crop=face",
+      bio: "Connecting talented creators with opportunities worldwide. Digital marketing strategist and growth expert."
+    },
+    {
+      name: "Lisa Thompson",
+      role: "Operations Director",
+      image: "https://images.unsplash.com/photo-1494790108755-2616b612b786?w=300&h=300&fit=crop&crop=face",
+      bio: "Ensuring smooth contest operations and timely prize distributions. Operations excellence specialist."
     }
   ];
 
@@ -214,14 +232,20 @@ export default function About() {
                 </p>
               </div>
               
-              <div className="grid md:grid-cols-3 gap-8">
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {team.map((member, index) => (
-                  <div key={index} className="text-center">
-                    <img
-                      src={member.image}
-                      alt={member.name}
-                      className="w-32 h-32 rounded-full object-cover mx-auto mb-4 border-4 border-red-100 dark:border-red-900"
-                    />
+                  <div key={index} className="text-center group hover:transform hover:scale-105 transition-all duration-300">
+                    <div className="relative mb-4">
+                      <img
+                        src={member.image}
+                        alt={member.name}
+                        className="w-32 h-32 rounded-full object-cover mx-auto border-4 border-red-100 dark:border-red-900 group-hover:border-red-300 dark:group-hover:border-red-700 transition-colors"
+                        onError={(e) => {
+                          e.target.src = "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=300&h=300&fit=crop&crop=face";
+                        }}
+                      />
+                      <div className="absolute inset-0 rounded-full bg-gradient-to-t from-red-600/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                    </div>
                     <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
                       {member.name}
                     </h3>
