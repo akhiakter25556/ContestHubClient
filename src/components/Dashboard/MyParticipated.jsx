@@ -11,16 +11,16 @@ export default function MyParticipated({ user }) {
   const fetchParticipatedContests = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:5000/api/user/participated", {
+      const response = await fetch("https://contesthub-akhi.vercel.app/api/user/participated", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         // Sort by upcoming deadline
-        const sortedContests = (data.contests || []).sort((a, b) => 
+        const sortedContests = (data.contests || []).sort((a, b) =>
           new Date(a.deadline) - new Date(b.deadline)
         );
         setContests(sortedContests);
@@ -41,7 +41,7 @@ export default function MyParticipated({ user }) {
 
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-    
+
     if (days > 0) return `${days} days, ${hours} hours left`;
     return `${hours} hours left`;
   };
@@ -71,7 +71,7 @@ export default function MyParticipated({ user }) {
                 <div className="flex-1">
                   <h3 className="text-xl font-bold mb-2">{contest.name}</h3>
                   <p className="text-gray-600 mb-3">{contest.description}</p>
-                  
+
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                     <div>
                       <span className="font-semibold text-gray-700">Type:</span>
@@ -91,24 +91,22 @@ export default function MyParticipated({ user }) {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="ml-6 text-right">
                   <div className="mb-2">
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                      getPaymentStatus(contest) === "Paid" 
-                        ? "bg-green-100 text-green-800" 
+                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${getPaymentStatus(contest) === "Paid"
+                        ? "bg-green-100 text-green-800"
                         : "bg-yellow-100 text-yellow-800"
-                    }`}>
+                      }`}>
                       {getPaymentStatus(contest)}
                     </span>
                   </div>
                   <div className="text-sm">
                     <span className="font-semibold text-gray-700">Deadline:</span>
-                    <p className={`${
-                      getTimeRemaining(contest.deadline) === "Contest Ended" 
-                        ? "text-red-600" 
+                    <p className={`${getTimeRemaining(contest.deadline) === "Contest Ended"
+                        ? "text-red-600"
                         : "text-blue-600"
-                    } font-medium`}>
+                      } font-medium`}>
                       {getTimeRemaining(contest.deadline)}
                     </p>
                   </div>
@@ -120,18 +118,17 @@ export default function MyParticipated({ user }) {
                   Joined: {new Date(contest.createdAt).toLocaleDateString()}
                 </div>
                 <div className="flex gap-2">
-                  <a 
+                  <a
                     href={`/contest/${contest._id}`}
                     className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 text-sm"
                   >
                     View Details
                   </a>
                   {contest.winnerId && (
-                    <span className={`px-3 py-2 rounded text-sm font-medium ${
-                      contest.winnerId === user.id 
-                        ? "bg-green-100 text-green-800" 
+                    <span className={`px-3 py-2 rounded text-sm font-medium ${contest.winnerId === user.id
+                        ? "bg-green-100 text-green-800"
                         : "bg-gray-100 text-gray-800"
-                    }`}>
+                      }`}>
                       {contest.winnerId === user.id ? "🏆 Winner!" : "Not Won"}
                     </span>
                   )}

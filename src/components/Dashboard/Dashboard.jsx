@@ -16,7 +16,7 @@ export default function Dashboard() {
           return;
         }
 
-        const response = await fetch("http://localhost:5000/api/auth/me", {
+        const response = await fetch("https://contesthub-akhi.vercel.app/api/auth/me", {
           headers: {
             Authorization: `Bearer ${token}`,
           },

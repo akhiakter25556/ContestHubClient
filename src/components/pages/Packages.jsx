@@ -1,9 +1,9 @@
 import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
-import { 
-  AnimatedPage, 
-  AnimatedCard, 
-  StaggerContainer, 
+import {
+  AnimatedPage,
+  AnimatedCard,
+  StaggerContainer,
   StaggerItem,
   buttonVariants
 } from "../animations/AnimatedComponents";
@@ -21,7 +21,7 @@ export default function Packages() {
 
   const fetchPackages = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/packages");
+      const response = await fetch("https://contesthub-akhi.vercel.app/api/packages");
       if (response.ok) {
         const data = await response.json();
         setPackages(data.packages || []);
@@ -36,10 +36,10 @@ export default function Packages() {
       const token = localStorage.getItem("token");
       if (!token) return;
 
-      const response = await fetch("http://localhost:5000/api/user/package", {
+      const response = await fetch("https://contesthub-akhi.vercel.app/api/user/package", {
         headers: { Authorization: `Bearer ${token}` }
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         if (data.hasPackage) {
@@ -61,15 +61,15 @@ export default function Packages() {
     }
 
     setPurchasing(packageId);
-    
+
     try {
-      const response = await fetch(`http://localhost:5000/api/packages/${packageId}/purchase`, {
+      const response = await fetch(`https://contesthub-akhi.vercel.app/api/packages/${packageId}/purchase`, {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` }
       });
-      
+
       const data = await response.json();
-      
+
       if (response.ok) {
         alert("Package purchased successfully!");
         fetchUserPackage(); // Refresh user package info
@@ -87,7 +87,7 @@ export default function Packages() {
   const getPackageColor = (color) => {
     const colors = {
       blue: "from-blue-500 to-blue-600",
-      purple: "from-purple-500 to-purple-600", 
+      purple: "from-purple-500 to-purple-600",
       gold: "from-yellow-500 to-orange-500",
       red: "from-red-500 to-pink-600"
     };
@@ -149,7 +149,7 @@ export default function Packages() {
                   Active Package: {userPackage.packageName}
                 </h3>
                 <p className="text-green-600 dark:text-green-400">
-                  {userPackage.contestLimit === -1 
+                  {userPackage.contestLimit === -1
                     ? "Unlimited contests remaining"
                     : `${userPackage.contestLimit - userPackage.contestsUsed} contests remaining`
                   }
@@ -219,11 +219,10 @@ export default function Packages() {
                     whileTap="tap"
                     onClick={() => handlePurchase(pkg._id)}
                     disabled={purchasing === pkg._id || (userPackage && !userPackage.expired)}
-                    className={`w-full py-3 px-4 rounded-lg font-medium transition-all ${
-                      userPackage && !userPackage.expired
+                    className={`w-full py-3 px-4 rounded-lg font-medium transition-all ${userPackage && !userPackage.expired
                         ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                         : `bg-gradient-to-r ${getPackageColor(pkg.color)} text-white hover:shadow-lg`
-                    }`}
+                      }`}
                   >
                     {purchasing === pkg._id ? (
                       <div className="flex items-center justify-center">
@@ -268,7 +267,7 @@ export default function Packages() {
                 How do packages work?
               </h3>
               <p className="text-gray-600 dark:text-gray-400">
-                Each package gives you a specific number of contests you can create within 30 days. 
+                Each package gives you a specific number of contests you can create within 30 days.
                 Once you reach your limit, you'll need to wait for renewal or upgrade to a higher package.
               </p>
             </motion.div>
@@ -283,7 +282,7 @@ export default function Packages() {
                 Can I upgrade my package?
               </h3>
               <p className="text-gray-600 dark:text-gray-400">
-                Currently, you need to wait for your current package to expire before purchasing a new one. 
+                Currently, you need to wait for your current package to expire before purchasing a new one.
                 We're working on upgrade functionality for future releases.
               </p>
             </motion.div>
@@ -298,7 +297,7 @@ export default function Packages() {
                 What happens to my contests if my package expires?
               </h3>
               <p className="text-gray-600 dark:text-gray-400">
-                Your existing contests will continue to run normally. You just won't be able to create 
+                Your existing contests will continue to run normally. You just won't be able to create
                 new contests until you purchase a new package.
               </p>
             </motion.div>

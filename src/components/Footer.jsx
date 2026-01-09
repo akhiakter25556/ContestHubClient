@@ -18,7 +18,7 @@ export default function Footer() {
                                 />
                             </div>
                             <h2 className="text-2xl font-bold">
-                                Contest<span className="text-blue-400">Hub</span>
+                                Contest<span className="">Hub</span>
                             </h2>
                         </div>
                         <p className="text-gray-400 text-sm mb-4 max-w-md">

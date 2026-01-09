@@ -31,7 +31,7 @@ export default function MyProfile({ user, onUpdate }) {
   const fetchUserStats = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:5000/api/user/stats", {
+      const response = await fetch("https://contesthub-akhi.vercel.app/api/user/stats", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -47,10 +47,10 @@ export default function MyProfile({ user, onUpdate }) {
   const handleUpdate = async (e) => {
     e.preventDefault();
     setLoading(true);
-    
+
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:5000/api/user/profile", {
+      const response = await fetch("https://contesthub-akhi.vercel.app/api/user/profile", {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -78,7 +78,7 @@ export default function MyProfile({ user, onUpdate }) {
   const WinPercentageChart = ({ percentage }) => {
     return (
       <div className="w-full bg-gray-200 rounded-full h-4 mb-2">
-        <div 
+        <div
           className="bg-gradient-to-r from-green-400 to-green-600 h-4 rounded-full transition-all duration-500"
           style={{ width: `${percentage}%` }}
         ></div>
@@ -89,7 +89,7 @@ export default function MyProfile({ user, onUpdate }) {
   return (
     <div>
       <h2 className="text-2xl font-bold mb-6">My Profile</h2>
-      
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Profile Form */}
         <div className="bg-white p-6 rounded-lg border">
@@ -105,7 +105,7 @@ export default function MyProfile({ user, onUpdate }) {
                 required
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
               <input
@@ -116,7 +116,7 @@ export default function MyProfile({ user, onUpdate }) {
               />
               <p className="text-xs text-gray-500 mt-1">Email cannot be changed</p>
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Photo URL</label>
               <input
@@ -127,7 +127,7 @@ export default function MyProfile({ user, onUpdate }) {
                 placeholder="https://example.com/your-photo.jpg"
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Bio</label>
               <textarea
@@ -137,7 +137,7 @@ export default function MyProfile({ user, onUpdate }) {
                 placeholder="Tell us about yourself..."
               />
             </div>
-            
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
               <textarea
@@ -147,9 +147,9 @@ export default function MyProfile({ user, onUpdate }) {
                 placeholder="Your address..."
               />
             </div>
-            
-            <button 
-              type="submit" 
+
+            <button
+              type="submit"
               disabled={loading}
               className="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
             >
@@ -188,7 +188,7 @@ export default function MyProfile({ user, onUpdate }) {
           {/* Win Percentage Chart */}
           <div className="bg-white p-6 rounded-lg border">
             <h3 className="text-xl font-semibold mb-4">Performance Statistics</h3>
-            
+
             <div className="space-y-4">
               <div>
                 <div className="flex justify-between items-center mb-2">

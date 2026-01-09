@@ -85,7 +85,7 @@ export default function About() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-red-600 to-pink-600 text-white py-20">
+      <div className="bg-gradient-to-r from-blue-500 to-purple-800 text-white py-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-5xl font-bold mb-6">About ContestHub</h1>
           <p className="text-xl text-red-100 max-w-3xl mx-auto leading-relaxed">
@@ -123,7 +123,7 @@ export default function About() {
                 onClick={() => setActiveTab("mission")}
                 className={`px-6 py-3 rounded-md font-medium transition-all ${
                   activeTab === "mission"
-                    ? "bg-red-600 text-white shadow-md"
+                    ? "bg-blue-700 text-white shadow-md"
                     : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-200"
                 }`}
               >
@@ -264,7 +264,7 @@ export default function About() {
       </div>
 
       {/* CTA Section */}
-      <div className="bg-gradient-to-r from-red-600 to-pink-600 text-white py-16">
+      <div className="bg-gradient-to-r from-blue-500 to-purple-800 text-white py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold mb-4">Ready to Showcase Your Talent?</h2>
           <p className="text-xl text-red-100 mb-8">
@@ -273,7 +273,7 @@ export default function About() {
           <div className="space-x-4">
             <a
               href="/register"
-              className="bg-white text-red-600 px-8 py-3 rounded-lg font-medium hover:bg-gray-100 transition-colors inline-block"
+              className="bg-white text-black px-8 py-3 rounded-lg font-medium hover:bg-gray-100 transition-colors inline-block"
             >
               Get Started Today
             </a>

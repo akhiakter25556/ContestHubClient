@@ -14,8 +14,8 @@ export default function Leaderboard() {
   const fetchLeaderboard = async () => {
     try {
       setLoading(true);
-      const response = await fetch(`http://localhost:5000/api/leaderboard?page=${currentPage}&limit=${itemsPerPage}`);
-      
+      const response = await fetch(`https://contesthub-akhi.vercel.app/api/leaderboard?page=${currentPage}&limit=${itemsPerPage}`);
+
       if (response.ok) {
         const data = await response.json();
         setUsers(data.users || []);
@@ -194,7 +194,7 @@ export default function Leaderboard() {
                     {users.map((user, index) => {
                       const rank = (currentPage - 1) * itemsPerPage + index + 1;
                       const winRate = user.participatedCount > 0 ? Math.round((user.wins / user.participatedCount) * 100) : 0;
-                      
+
                       return (
                         <tr key={user._id} className="hover:bg-gray-50 dark:hover:bg-gray-700/50">
                           <td className="px-6 py-4 whitespace-nowrap">
@@ -264,21 +264,20 @@ export default function Leaderboard() {
                       >
                         Previous
                       </button>
-                      
+
                       {[...Array(totalPages)].map((_, i) => (
                         <button
                           key={i + 1}
                           onClick={() => setCurrentPage(i + 1)}
-                          className={`px-3 py-2 text-sm font-medium rounded-md ${
-                            currentPage === i + 1
+                          className={`px-3 py-2 text-sm font-medium rounded-md ${currentPage === i + 1
                               ? "bg-red-600 text-white"
                               : "text-gray-500 bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-600"
-                          }`}
+                            }`}
                         >
                           {i + 1}
                         </button>
                       ))}
-                      
+
                       <button
                         onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                         disabled={currentPage === totalPages}
@@ -303,7 +302,7 @@ export default function Leaderboard() {
             </h3>
             <p className="text-gray-600 dark:text-gray-400">Total Participations</p>
           </div>
-          
+
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 text-center">
             <div className="text-3xl mb-2">🏆</div>
             <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">
@@ -311,7 +310,7 @@ export default function Leaderboard() {
             </h3>
             <p className="text-gray-600 dark:text-gray-400">Total Wins</p>
           </div>
-          
+
           <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 text-center">
             <div className="text-3xl mb-2">👥</div>
             <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-1">

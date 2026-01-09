@@ -9,7 +9,7 @@ export default function RoleManagement() {
       try {
         const token = localStorage.getItem("token");
         if (token) {
-          const response = await fetch("http://localhost:5000/api/auth/me", {
+          const response = await fetch("https://contesthub-akhi.vercel.app/api/auth/me", {
             headers: { Authorization: `Bearer ${token}` },
           });
           if (response.ok) {
@@ -74,7 +74,7 @@ export default function RoleManagement() {
   return (
     <div className="max-w-4xl mx-auto p-6">
       <h1 className="text-3xl font-bold text-center mb-8">Role Management System</h1>
-      
+
       {/* Current User Role */}
       <div className={`bg-${roleInfo.color}-50 border-2 border-${roleInfo.color}-200 rounded-xl p-6 mb-8`}>
         <div className="text-center">
@@ -93,11 +93,10 @@ export default function RoleManagement() {
         {Object.entries(roleFeatures).map(([role, info]) => (
           <div
             key={role}
-            className={`bg-white rounded-xl shadow-lg p-6 border-2 ${
-              currentRole === role 
-                ? `border-${info.color}-300 ring-2 ring-${info.color}-200` 
+            className={`bg-white rounded-xl shadow-lg p-6 border-2 ${currentRole === role
+                ? `border-${info.color}-300 ring-2 ring-${info.color}-200`
                 : 'border-gray-200'
-            }`}
+              }`}
           >
             <div className="text-center mb-4">
               <div className="text-3xl mb-2">{info.icon}</div>
@@ -110,7 +109,7 @@ export default function RoleManagement() {
                 </span>
               )}
             </div>
-            
+
             <ul className="space-y-2">
               {info.features.map((feature, index) => (
                 <li key={index} className="text-sm text-gray-700">

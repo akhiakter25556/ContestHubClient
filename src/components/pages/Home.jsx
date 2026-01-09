@@ -1,11 +1,11 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
-import { 
-  AnimatedPage, 
-  AnimatedCard, 
-  StaggerContainer, 
-  StaggerItem, 
+import {
+  AnimatedPage,
+  AnimatedCard,
+  StaggerContainer,
+  StaggerItem,
   SlideIn,
   FloatingElement,
   CountUp,
@@ -18,7 +18,7 @@ export default function Home() {
   const [searchQuery, setSearchQuery] = useState("");
   const [recentWinners, setRecentWinners] = useState([]);
   const navigate = useNavigate();
-  
+
   // Check if user is logged in
   const isLoggedIn = localStorage.getItem("token");
 
@@ -29,14 +29,14 @@ export default function Home() {
 
   const fetchPopularContests = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/contests");
+      const response = await fetch("https://contesthub-akhi.vercel.app/api/contests");
       const data = await response.json();
-      
+
       // Sort by participants count (highest first) and take top 5
       const sortedContests = (data.contests || [])
         .sort((a, b) => (b.participants?.length || 0) - (a.participants?.length || 0))
         .slice(0, 5);
-      
+
       setContests(sortedContests);
     } catch (error) {
       console.error("Failed to fetch contests:", error);
@@ -48,7 +48,7 @@ export default function Home() {
 
   const fetchRecentWinners = async () => {
     try {
-      const response = await fetch("http://localhost:5000/api/recent-winners");
+      const response = await fetch("https://contesthub-akhi.vercel.app/api/recent-winners");
       if (response.ok) {
         const data = await response.json();
         setRecentWinners(data.winners || []);
@@ -76,71 +76,82 @@ export default function Home() {
   return (
     <AnimatedPage>
       {/* Hero Banner Section */}
-      <section className="relative bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-800 text-white overflow-hidden">
-        <div className="absolute inset-0 bg-black opacity-20"></div>
-        <div className="absolute inset-0">
-          <div className="absolute top-10 left-10 w-72 h-72 bg-blue-400 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse"></div>
-          <div className="absolute top-20 right-10 w-72 h-72 bg-purple-400 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse animation-delay-2000"></div>
-          <div className="absolute -bottom-8 left-20 w-72 h-72 bg-pink-400 rounded-full mix-blend-multiply filter blur-xl opacity-70 animate-pulse animation-delay-4000"></div>
-        </div>
-        
-        <div className="relative max-w-7xl mx-auto px-6 py-24 text-center">
-          <SlideIn direction="down">
-            <h1 className="text-5xl md:text-6xl font-bold mb-6 leading-tight">
-              Unleash Your <span className="text-yellow-400">Creativity</span>
-              <br />
-              Win Amazing <span className="text-green-400">Prizes</span>
-            </h1>
-          </SlideIn>
-          <SlideIn direction="up">
-            <p className="text-xl md:text-2xl mb-8 text-gray-200 max-w-3xl mx-auto">
-              Join thousands of creators in exciting contests. Showcase your skills, compete with the best, and earn incredible rewards.
-            </p>
-          </SlideIn>
-          
-          {/* Search Bar */}
-          <SlideIn direction="up">
-            <form onSubmit={handleSearch} className="max-w-2xl mx-auto mb-8">
-              <div className="relative">
-                <input
-                  type="text"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  placeholder="Search contests by type (Logo Design, Web Design, Writing...)"
-                  className="w-full px-6 py-4 text-lg text-gray-800 bg-white rounded-full shadow-lg focus:outline-none focus:ring-4 focus:ring-yellow-400 focus:ring-opacity-50"
-                />
-                <motion.button
-                  type="submit"
-                  variants={buttonVariants}
-                  whileHover="hover"
-                  whileTap="tap"
-                  className="absolute right-2 top-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-8 py-2 rounded-full hover:from-yellow-500 hover:to-orange-600 transition-all duration-300 font-semibold"
-                >
-                  Search
-                </motion.button>
-              </div>
-            </form>
-          </SlideIn>
+ <section className="relative text-white overflow-hidden min-h-[90vh] flex items-center">
+  {/* Background Image */}
+  <img
+    src="https://i.ibb.co/32572x4/home.jpg"
+    alt="Hero Background"
+    className="absolute inset-0 w-full h-full object-cover"
+  />
 
-          {/* CTA Buttons */}
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Link
-              to="/all-contests"
-              className="bg-gradient-to-r from-green-400 to-blue-500 text-white px-8 py-4 rounded-full text-lg font-semibold hover:from-green-500 hover:to-blue-600 transition-all duration-300 shadow-lg"
-            >
-              Browse All Contests
-            </Link>
-            {!isLoggedIn && (
-              <Link
-                to="/register"
-                className="bg-transparent border-2 border-white text-white px-8 py-4 rounded-full text-lg font-semibold hover:bg-white hover:text-purple-600 transition-all duration-300"
-              >
-                Join Now - It's Free!
-              </Link>
-            )}
-          </div>
+  {/* Dark Overlay */}
+  <div className="absolute inset-0 bg-black/50"></div>
+
+  {/* Content */}
+  <div className="relative max-w-7xl mx-auto px-6 py-24 text-center">
+    <SlideIn direction="down">
+      <h1 className="text-4xl md:text-6xl font-extrabold mb-6 leading-tight">
+        Unleash Your <span className="text-green-400">Creativity</span>
+        <br />
+        Win Amazing <span className="text-blue-400">Prizes</span>
+      </h1>
+    </SlideIn>
+
+    {/* Search Bar */}
+    <SlideIn direction="up">
+      <form onSubmit={handleSearch} className="max-w-2xl mx-auto mb-10">
+        <div className="relative">
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search contests (Logo, Web, Writing...)"
+            className="w-full px-6 py-4 text-lg text-gray-800 rounded-full shadow-xl focus:outline-none focus:ring-4 focus:ring-green-400"
+          />
+
+          <motion.button
+            type="submit"
+            variants={buttonVariants}
+            whileHover="hover"
+            whileTap="tap"
+            className="absolute right-2 top-1/2 -translate-y-1/2
+              bg-gradient-to-r from-green-500 to-blue-500
+              text-white px-7 py-2.5 rounded-full
+              font-semibold shadow-lg
+              hover:scale-105 transition-all duration-300"
+          >
+            Search
+          </motion.button>
         </div>
-      </section>
+      </form>
+    </SlideIn>
+
+    {/* CTA Buttons */}
+    <div className="flex flex-col sm:flex-row gap-4 justify-center">
+      <Link
+        to="/all-contests"
+        className="bg-gradient-to-r from-green-500 to-blue-500
+          text-white px-10 py-4 rounded-full text-lg font-semibold
+          shadow-xl hover:scale-105 transition-all duration-300"
+      >
+        Browse All Contests
+      </Link>
+
+      {!isLoggedIn && (
+        <Link
+          to="/register"
+          className="border-2 border-white text-white
+            px-10 py-4 rounded-full text-lg font-semibold
+            hover:bg-white hover:text-black
+            transition-all duration-300"
+        >
+          Join Now — It’s Free
+        </Link>
+      )}
+    </div>
+  </div>
+</section>
+
 
       {/* Popular Contests Section */}
       <section className="p-8 bg-white dark:bg-gray-800">
@@ -152,8 +163,8 @@ export default function Home() {
               whileHover="hover"
               whileTap="tap"
             >
-              <Link 
-                to="/all-contests" 
+              <Link
+                to="/all-contests"
                 className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
               >
                 Show All
@@ -161,7 +172,7 @@ export default function Home() {
             </motion.div>
           </div>
         </SlideIn>
-        
+
         {loading ? (
           <div className="text-center py-8">
             <p>Loading contests...</p>
@@ -175,35 +186,35 @@ export default function Home() {
             {contests.map((contest) => (
               <StaggerItem key={contest._id}>
                 <AnimatedCard className="border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-lg shadow-md p-4 hover:shadow-lg transition-shadow">
-                <img
-                  src={contest.imageURL || `https://picsum.photos/300/200?random=${contest._id}`}
-                  alt={contest.name}
-                  className="w-full h-32 object-cover mb-3 rounded"
-                  onError={(e) => {
-                    e.target.src = `https://picsum.photos/300/200?random=${Math.random()}`;
-                  }}
-                />
-                <h3 className="font-bold text-lg mb-2 text-gray-900 dark:text-white">{contest.name}</h3>
-                <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
-                  Participants: {contest.participants?.length || 0}
-                </p>
-                <p className="text-sm text-gray-700 dark:text-gray-300 mb-3">
-                  {contest.description 
-                    ? contest.description.length > 60 
-                      ? contest.description.slice(0, 60) + "..."
-                      : contest.description
-                    : "No description available"
-                  }
-                </p>
-                <motion.button
-                  onClick={() => handleDetailsClick(contest._id)}
-                  variants={buttonVariants}
-                  whileHover="hover"
-                  whileTap="tap"
-                  className="w-full bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600 transition-colors"
-                >
-                  Details
-                </motion.button>
+                  <img
+                    src={contest.imageURL || `https://picsum.photos/300/200?random=${contest._id}`}
+                    alt={contest.name}
+                    className="w-full h-32 object-cover mb-3 rounded"
+                    onError={(e) => {
+                      e.target.src = `https://picsum.photos/300/200?random=${Math.random()}`;
+                    }}
+                  />
+                  <h3 className="font-bold text-lg mb-2 text-gray-900 dark:text-white">{contest.name}</h3>
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
+                    Participants: {contest.participants?.length || 0}
+                  </p>
+                  <p className="text-sm text-gray-700 dark:text-gray-300 mb-3">
+                    {contest.description
+                      ? contest.description.length > 60
+                        ? contest.description.slice(0, 60) + "..."
+                        : contest.description
+                      : "No description available"
+                    }
+                  </p>
+                  <motion.button
+                    onClick={() => handleDetailsClick(contest._id)}
+                    variants={buttonVariants}
+                    whileHover="hover"
+                    whileTap="tap"
+                    className="w-full bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600 transition-colors"
+                  >
+                    Details
+                  </motion.button>
                 </AnimatedCard>
               </StaggerItem>
             ))}

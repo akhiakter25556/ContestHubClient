@@ -21,41 +21,41 @@ export default function ContestDetails() {
       navigate("/login");
       return;
     }
-    
+
     // Get user info
-    fetch("http://localhost:5000/api/auth/me", {
+    fetch("https://contesthub-akhi.vercel.app/api/auth/me", {
       headers: { Authorization: `Bearer ${token}` },
     })
-    .then(res => res.json())
-    .then(data => {
-      if (data.user) {
-        setUser(data.user);
-      } else {
-        navigate("/login");
-      }
-    })
-    .catch(() => navigate("/login"));
+      .then(res => res.json())
+      .then(data => {
+        if (data.user) {
+          setUser(data.user);
+        } else {
+          navigate("/login");
+        }
+      })
+      .catch(() => navigate("/login"));
   }, [navigate]);
 
   // Fetch contest details
   useEffect(() => {
     if (!user) return;
-    
+
     const fetchContest = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await fetch(`http://localhost:5000/api/contests/${id}`, {
+        const res = await fetch(`https://contesthub-akhi.vercel.app/api/contests/${id}`, {
           headers: { Authorization: `Bearer ${token}` },
         });
-        
+
         if (res.ok) {
           const data = await res.json();
           setContest(data.contest);
           setIsRegistered(data.contest.participants?.includes(user.id) || false);
-          
+
           // Fetch winner details if exists
           if (data.contest.winnerId) {
-            const winnerRes = await fetch(`http://localhost:5000/api/user/${data.contest.winnerId}`, {
+            const winnerRes = await fetch(`https://contesthub-akhi.vercel.app/api/user/${data.contest.winnerId}`, {
               headers: { Authorization: `Bearer ${token}` },
             });
             if (winnerRes.ok) {
@@ -94,7 +94,7 @@ export default function ContestDetails() {
         const hrs = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
         const mins = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
         const secs = Math.floor((diff % (1000 * 60)) / 1000);
-        
+
         if (days > 0) {
           setTimeLeft(`${days}d ${hrs}h ${mins}m ${secs}s`);
         } else {
@@ -110,7 +110,7 @@ export default function ContestDetails() {
   const handleRegisterPay = async () => {
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://localhost:5000/api/contests/${id}/pay`, {
+      const res = await fetch(`https://contesthub-akhi.vercel.app/api/contests/${id}/pay`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -142,7 +142,7 @@ export default function ContestDetails() {
 
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://localhost:5000/api/contests/${id}/submit`, {
+      const res = await fetch(`https://contesthub-akhi.vercel.app/api/contests/${id}/submit`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -239,7 +239,7 @@ export default function ContestDetails() {
               <p className="text-gray-600 leading-relaxed mb-6">
                 {contest.description || "No description provided for this contest."}
               </p>
-              
+
               {contest.taskInstruction && (
                 <>
                   <h3 className="text-xl font-bold text-gray-800 mb-3">Task Instructions</h3>
@@ -278,7 +278,7 @@ export default function ContestDetails() {
             {/* Contest Info Card */}
             <div className="bg-white rounded-2xl p-6 shadow-lg mb-6 sticky top-6">
               <h3 className="text-xl font-bold text-gray-800 mb-4">Contest Details</h3>
-              
+
               <div className="space-y-4">
                 <div className="flex justify-between items-center">
                   <span className="text-gray-600">Entry Fee:</span>
@@ -311,11 +311,10 @@ export default function ContestDetails() {
                   <button
                     onClick={handleRegisterPay}
                     disabled={isContestEnded}
-                    className={`w-full py-3 px-6 rounded-full font-semibold transition-all duration-300 ${
-                      isContestEnded
+                    className={`w-full py-3 px-6 rounded-full font-semibold transition-all duration-300 ${isContestEnded
                         ? "bg-gray-300 text-gray-500 cursor-not-allowed"
                         : "bg-gradient-to-r from-blue-600 to-purple-600 text-white hover:from-blue-700 hover:to-purple-700 hover:scale-105"
-                    }`}
+                      }`}
                   >
                     {isContestEnded ? "Contest Ended" : `Register Now - $${contest.price}`}
                   </button>

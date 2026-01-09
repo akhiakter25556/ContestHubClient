@@ -5,70 +5,45 @@ const ThemeContext = createContext();
 export const useTheme = () => {
   const context = useContext(ThemeContext);
   if (!context) {
-    throw new Error("useTheme must be used within a ThemeProvider");
+    throw new Error("useTheme must be used within ThemeProvider");
   }
   return context;
 };
 
 export const ThemeProvider = ({ children }) => {
-  const [theme, setTheme] = useState("light");
+  const [theme, setTheme] = useState(null);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // Initialize theme from localStorage on client side
   useEffect(() => {
     const savedTheme = localStorage.getItem("contesthub-theme");
-    const systemPreference = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-    const initialTheme = savedTheme || systemPreference;
-    
-    setTheme(initialTheme);
+
+    if (savedTheme === "light" || savedTheme === "dark") {
+      setTheme(savedTheme);
+      document.documentElement.classList.toggle("dark", savedTheme === "dark");
+    } else {
+      const systemDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      const systemTheme = systemDark ? "dark" : "light";
+
+      setTheme(systemTheme);
+      document.documentElement.classList.toggle("dark", systemDark);
+      localStorage.setItem("contesthub-theme", systemTheme);
+    }
+
     setIsInitialized(true);
-
-    // Listen for system theme changes (only if no saved preference)
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-    const handleSystemThemeChange = (e) => {
-      // Only update if user hasn't manually set a preference
-      if (!localStorage.getItem("contesthub-theme")) {
-        setTheme(e.matches ? "dark" : "light");
-      }
-    };
-
-    mediaQuery.addEventListener("change", handleSystemThemeChange);
-    
-    return () => {
-      mediaQuery.removeEventListener("change", handleSystemThemeChange);
-    };
   }, []);
 
-  useEffect(() => {
-    if (!isInitialized) return;
-    
-    // Apply theme to document
-    const root = document.documentElement;
-    
-    if (theme === "dark") {
-      root.classList.add("dark");
-    } else {
-      root.classList.remove("dark");
-    }
-    
-    // Save theme to localStorage
-    localStorage.setItem("contesthub-theme", theme);
-  }, [theme, isInitialized]);
-
   const toggleTheme = () => {
-    const newTheme = theme === "light" ? "dark" : "light";
+    const newTheme = theme === "dark" ? "light" : "dark";
     setTheme(newTheme);
-  };
 
-  const value = {
-    theme,
-    toggleTheme,
-    isDark: theme === "dark",
-    isInitialized
+    document.documentElement.classList.toggle("dark", newTheme === "dark");
+    localStorage.setItem("contesthub-theme", newTheme);
   };
 
   return (
-    <ThemeContext.Provider value={value}>
+    <ThemeContext.Provider
+      value={{ theme, toggleTheme, isDark: theme === "dark", isInitialized }}
+    >
       {children}
     </ThemeContext.Provider>
   );

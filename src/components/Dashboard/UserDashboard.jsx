@@ -19,7 +19,7 @@ export default function UserDashboard({ user }) {
   const fetchUserStats = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:5000/api/user/stats", {
+      const response = await fetch("https://contesthub-akhi.vercel.app/api/user/stats", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -52,7 +52,7 @@ export default function UserDashboard({ user }) {
             </div>
           </div>
         </div>
-        
+
         <div className="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
           <div className="flex items-center justify-between">
             <div>
@@ -66,7 +66,7 @@ export default function UserDashboard({ user }) {
             </div>
           </div>
         </div>
-        
+
         <div className="bg-gradient-to-br from-purple-50 to-purple-100 p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
           <div className="flex items-center justify-between">
             <div>
@@ -80,7 +80,7 @@ export default function UserDashboard({ user }) {
             </div>
           </div>
         </div>
-        
+
         <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 p-6 rounded-xl shadow-lg hover:shadow-xl transition-shadow">
           <div className="flex items-center justify-between">
             <div>
@@ -100,31 +100,28 @@ export default function UserDashboard({ user }) {
       <div className="flex gap-4 mb-6 border-b">
         <button
           onClick={() => setActiveTab("participated")}
-          className={`px-4 py-2 font-medium ${
-            activeTab === "participated"
+          className={`px-4 py-2 font-medium ${activeTab === "participated"
               ? "text-blue-600 border-b-2 border-blue-600"
               : "text-gray-600 hover:text-blue-600"
-          }`}
+            }`}
         >
           My Participated Contests
         </button>
         <button
           onClick={() => setActiveTab("winning")}
-          className={`px-4 py-2 font-medium ${
-            activeTab === "winning"
+          className={`px-4 py-2 font-medium ${activeTab === "winning"
               ? "text-blue-600 border-b-2 border-blue-600"
               : "text-gray-600 hover:text-blue-600"
-          }`}
+            }`}
         >
           My Winning Contests
         </button>
         <button
           onClick={() => setActiveTab("profile")}
-          className={`px-4 py-2 font-medium ${
-            activeTab === "profile"
+          className={`px-4 py-2 font-medium ${activeTab === "profile"
               ? "text-blue-600 border-b-2 border-blue-600"
               : "text-gray-600 hover:text-blue-600"
-          }`}
+            }`}
         >
           My Profile
         </button>

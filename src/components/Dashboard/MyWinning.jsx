@@ -12,16 +12,16 @@ export default function MyWinning({ user }) {
   const fetchWinnings = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:5000/api/user/winnings", {
+      const response = await fetch("https://contesthub-akhi.vercel.app/api/user/winnings", {
         headers: {
           Authorization: `Bearer ${token}`,
         },
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         setWinnings(data.winnings || []);
-        
+
         // Calculate total prize won
         const total = (data.winnings || []).reduce((sum, contest) => sum + (contest.prizeMoney || 0), 0);
         setTotalPrizeWon(total);
@@ -66,7 +66,7 @@ export default function MyWinning({ user }) {
                   <div className="flex-1">
                     <h3 className="text-xl font-bold text-green-800 mb-2">{contest.name}</h3>
                     <p className="text-gray-700 mb-3">{contest.description}</p>
-                    
+
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
                       <div>
                         <span className="font-semibold text-gray-700">Contest Type:</span>
@@ -87,7 +87,7 @@ export default function MyWinning({ user }) {
                     </div>
                   </div>
                 </div>
-                
+
                 <div className="flex flex-col items-center gap-2">
                   <div className="bg-yellow-400 text-yellow-900 rounded-full p-3">
                     <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
@@ -103,7 +103,7 @@ export default function MyWinning({ user }) {
                   <div className="text-sm text-gray-600">
                     <span className="font-semibold">Achievement:</span> Won among {contest.participants?.length || 0} participants
                   </div>
-                  <a 
+                  <a
                     href={`/contest/${contest._id}`}
                     className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700 text-sm"
                   >
@@ -120,7 +120,7 @@ export default function MyWinning({ user }) {
         <div className="mt-8 p-6 bg-blue-50 rounded-lg">
           <h3 className="text-lg font-bold text-blue-800 mb-2">🎉 Congratulations!</h3>
           <p className="text-blue-700">
-            You've won {winnings.length} contest{winnings.length > 1 ? 's' : ''} and earned a total of ${totalPrizeWon} in prizes. 
+            You've won {winnings.length} contest{winnings.length > 1 ? 's' : ''} and earned a total of ${totalPrizeWon} in prizes.
             Keep up the excellent work!
           </p>
         </div>

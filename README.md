@@ -1,7 +1,7 @@
  ContestHub – Online Contest Management Platform
 
  Live Site URL
-https://your-contesthub-live-site-url.com
+live link: https://wondrous-treacle-6f0d09.netlify.app/
 
 = Features (10+ Bullet Points)
 1. User can register and log in securely (JWT-based authentication)

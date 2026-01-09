@@ -16,7 +16,7 @@ export default function Navbar() {
         try {
             const token = localStorage.getItem("token");
             if (token) {
-                const response = await fetch("http://localhost:5000/api/auth/me", {
+                const response = await fetch("https://contesthub-akhi.vercel.app/api/auth/me", {
                     headers: { Authorization: `Bearer ${token}` },
                 });
                 if (response.ok) {
@@ -39,20 +39,20 @@ export default function Navbar() {
     const toggleDropdown = () => setDropdownOpen(prev => !prev);
 
     return (
-        <nav className="glass-nav sticky top-0 z-50 transition-all duration-300 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md">
+        <nav className="sticky top-0 z-50 transition-all duration-300 ">
             <div className="max-w-7xl mx-auto px-6 py-4 flex justify-between items-center">
-                
+
                 {/* Logo + Name */}
                 <Link to="/" className="flex items-center gap-3 group">
-                    <div className="bg-gradient-to-tr from-blue-600 to-indigo-500 p-2 rounded-xl shadow-lg shadow-indigo-500/30 group-hover:scale-110 transition-transform duration-300">
-                        <img 
-                            src="https://cdn-icons-png.flaticon.com/512/3176/3176363.png" 
-                            alt="Logo" 
-                            className="w-6 h-6"
+                    <div className=" p-2  ">
+                        <img
+                            src="https://i.ibb.co/fzJ9stdF/logo.webp"
+                            alt="Logo"
+                            className="w-17 h-10"
                         />
                     </div>
                     <span className="font-display font-bold text-2xl tracking-tight text-gray-900 dark:text-white">
-                        Contest<span className="text-blue-600">Hub</span>
+                        Contest<span className="">Hub</span>
                     </span>
                 </Link>
 
@@ -108,14 +108,14 @@ export default function Navbar() {
                     {/* User Profile */}
                     {user ? (
                         <div className="relative">
-                            <button 
-                                onClick={toggleDropdown} 
+                            <button
+                                onClick={toggleDropdown}
                                 className="flex items-center gap-2 pl-4 border-l border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded"
                             >
-                                <img 
-                                    src={user.photoURL || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face'} 
-                                    alt="Profile" 
-                                    className="w-10 h-10 rounded-full object-cover border-2 border-white dark:border-gray-800 shadow-md ring-2 ring-gray-100 dark:ring-gray-700" 
+                                <img
+                                    src={user.photoURL || 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=40&h=40&fit=crop&crop=face'}
+                                    alt="Profile"
+                                    className="w-10 h-10 rounded-full object-cover border-2 border-white dark:border-gray-800 shadow-md ring-2 ring-gray-100 dark:ring-gray-700"
                                 />
                             </button>
 
@@ -150,44 +150,44 @@ export default function Navbar() {
             {mobileMenuOpen && (
                 <div className="md:hidden bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-700">
                     <div className="px-6 py-4 space-y-3">
-                        <Link 
-                            to="/" 
+                        <Link
+                            to="/"
                             onClick={() => setMobileMenuOpen(false)}
                             className="block text-sm font-medium text-gray-600 hover:text-red-600 dark:text-gray-300 dark:hover:text-white transition-colors"
                         >
                             Home
                         </Link>
-                        <Link 
-                            to="/all-contests" 
+                        <Link
+                            to="/all-contests"
                             onClick={() => setMobileMenuOpen(false)}
                             className="block text-sm font-medium text-gray-600 hover:text-red-600 dark:text-gray-300 dark:hover:text-white transition-colors"
                         >
                             All Contests
                         </Link>
-                        <Link 
-                            to="/leaderboard" 
+                        <Link
+                            to="/leaderboard"
                             onClick={() => setMobileMenuOpen(false)}
                             className="block text-sm font-medium text-gray-600 hover:text-red-600 dark:text-gray-300 dark:hover:text-white transition-colors"
                         >
                             Leaderboard
                         </Link>
-                        <Link 
-                            to="/about" 
+                        <Link
+                            to="/about"
                             onClick={() => setMobileMenuOpen(false)}
                             className="block text-sm font-medium text-gray-600 hover:text-red-600 dark:text-gray-300 dark:hover:text-white transition-colors"
                         >
                             About
                         </Link>
-                        <Link 
-                            to="/help" 
+                        <Link
+                            to="/help"
                             onClick={() => setMobileMenuOpen(false)}
                             className="block text-sm font-medium text-gray-600 hover:text-red-600 dark:text-gray-300 dark:hover:text-white transition-colors"
                         >
                             Help
                         </Link>
                         {user?.role === 'creator' && (
-                            <Link 
-                                to="/packages" 
+                            <Link
+                                to="/packages"
                                 onClick={() => setMobileMenuOpen(false)}
                                 className="block text-sm font-medium text-gray-600 hover:text-red-600 dark:text-gray-300 dark:hover:text-white transition-colors"
                             >
@@ -195,8 +195,8 @@ export default function Navbar() {
                             </Link>
                         )}
                         {!user && (
-                            <Link 
-                                to="/login" 
+                            <Link
+                                to="/login"
                                 onClick={() => setMobileMenuOpen(false)}
                                 className="block w-full text-center bg-red-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-red-700 transition-colors"
                             >

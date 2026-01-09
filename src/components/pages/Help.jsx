@@ -139,7 +139,7 @@ export default function Help() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
-      <div className="bg-gradient-to-r from-red-600 to-pink-600 text-white py-16">
+      <div className="bg-gradient-to-r from-blue-500 to-purple-800 text-white py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-white bg-opacity-20 rounded-full mb-4">
             <span className="text-2xl">❓</span>
@@ -254,7 +254,7 @@ export default function Help() {
       </div>
 
       {/* Contact Support */}
-      <div className="bg-gradient-to-r from-red-600 to-pink-600 text-white py-16">
+      <div className="bg-gradient-to-r from-blue-500 to-purple-800 text-white py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-white bg-opacity-20 rounded-full mb-4">
             <span className="text-2xl">💬</span>
@@ -266,13 +266,15 @@ export default function Help() {
           <div className="space-x-4">
             <a
               href="mailto:support@contesthub.com"
-              className="bg-white text-red-600 px-8 py-3 rounded-lg font-medium hover:bg-gray-100 transition-colors inline-block"
+              className="bg-white text-black px-8 py-3 rounded-lg
+               font-medium hover:bg-gray-100 transition-colors inline-block"
             >
               Email Support
             </a>
             <a
               href="/about"
-              className="border-2 border-white text-white px-8 py-3 rounded-lg font-medium hover:bg-white hover:text-red-600 transition-colors inline-block"
+              className="border-2 border-white text-white
+               px-8 py-3 rounded-lg font-medium hover:bg-white hover:text-black transition-colors inline-block"
             >
               Learn More About Us
             </a>

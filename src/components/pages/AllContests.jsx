@@ -8,7 +8,7 @@ export default function AllContests() {
   const [searchParams] = useSearchParams();
   const searchQuery = searchParams.get("search") || "";
   const navigate = useNavigate();
-  
+
   // Check if user is logged in
   const isLoggedIn = localStorage.getItem("token");
 
@@ -16,14 +16,14 @@ export default function AllContests() {
   useEffect(() => {
     const fetchContests = async () => {
       try {
-        const url = searchQuery 
-          ? `http://localhost:5000/api/contests?search=${encodeURIComponent(searchQuery)}`
-          : "http://localhost:5000/api/contests";
-        
+        const url = searchQuery
+          ? `https://contesthub-akhi.vercel.app/api/contests?search=${encodeURIComponent(searchQuery)}`
+          : "https://contesthub-akhi.vercel.app/api/contests";
+
         const response = await fetch(url);
         const data = await response.json();
         setContests(data.contests || []);
-        
+
         // If search query exists, set activeTab to "all" to show search results
         if (searchQuery) {
           setActiveTab("all");
@@ -71,7 +71,7 @@ export default function AllContests() {
 
     const days = Math.floor(diff / (1000 * 60 * 60 * 24));
     if (days > 0) return `${days} days left`;
-    
+
     const hours = Math.floor(diff / (1000 * 60 * 60));
     return `${hours} hours left`;
   };
@@ -96,8 +96,8 @@ export default function AllContests() {
             Discover Amazing Contests
           </h1>
           <p className="text-xl text-blue-100 max-w-3xl mx-auto">
-            {searchQuery 
-              ? `Search results for "${searchQuery}"` 
+            {searchQuery
+              ? `Search results for "${searchQuery}"`
               : "Explore all approved contests and find your perfect creative challenge"
             }
           </p>
@@ -117,11 +117,10 @@ export default function AllContests() {
               <button
                 key={tab.key}
                 onClick={() => setActiveTab(tab.key)}
-                className={`flex items-center gap-2 px-6 py-3 rounded-full border-2 transition-all duration-300 font-medium ${
-                  activeTab === tab.key
+                className={`flex items-center gap-2 px-6 py-3 rounded-full border-2 transition-all duration-300 font-medium ${activeTab === tab.key
                     ? "bg-blue-600 text-white border-blue-600 shadow-lg transform scale-105"
                     : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-600 hover:border-blue-300 hover:text-blue-600 dark:hover:text-blue-400 hover:shadow-md"
-                }`}
+                  }`}
               >
                 <span className="text-lg">{tab.icon}</span>
                 <span>{tab.label}</span>
@@ -141,7 +140,7 @@ export default function AllContests() {
             <div className="text-6xl mb-4">🔍</div>
             <h3 className="text-2xl font-bold text-gray-800 dark:text-white mb-2">No Contests Found</h3>
             <p className="text-gray-600 dark:text-gray-400 mb-6">
-              {searchQuery 
+              {searchQuery
                 ? `No contests match your search for "${searchQuery}"`
                 : `No contests available in ${activeTab} category`
               }
@@ -170,19 +169,9 @@ export default function AllContests() {
                       e.target.src = "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=250&fit=crop";
                     }}
                   />
-                  <div className="absolute top-4 left-4">
-                    <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm font-medium">
-                      {contest.type}
-                    </span>
-                  </div>
+                 
                   <div className="absolute top-4 right-4">
-                    <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                      getTimeRemaining(contest.deadline) === "Ended" 
-                        ? "bg-red-500 text-white" 
-                        : "bg-green-500 text-white"
-                    }`}>
-                      {getTimeRemaining(contest.deadline)}
-                    </span>
+                   
                   </div>
                 </div>
 
@@ -191,7 +180,7 @@ export default function AllContests() {
                   <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-2 line-clamp-2">
                     {contest.name}
                   </h3>
-                  
+
                   <p className="text-gray-600 dark:text-gray-400 text-sm mb-4 line-clamp-3">
                     {contest.description || "No description available"}
                   </p>
@@ -215,7 +204,7 @@ export default function AllContests() {
                   {/* Prize and Action */}
                   <div className="flex items-center justify-between">
                     <div>
-                      <p className="text-2xl font-bold text-green-600">
+                      <p className="text-2xl font-bold text-black">
                         ${contest.prizeMoney}
                       </p>
                       <p className="text-xs text-gray-500">Prize Money</p>

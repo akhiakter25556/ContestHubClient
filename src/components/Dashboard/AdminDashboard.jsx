@@ -48,14 +48,14 @@ export default function AdminDashboard({ user }) {
   const fetchData = async () => {
     try {
       const token = localStorage.getItem("token");
-      
+
       // Fetch all contests (including pending)
-      const contestsRes = await fetch("http://localhost:5000/api/admin/contests", {
+      const contestsRes = await fetch("https://contesthub-akhi.vercel.app/api/admin/contests", {
         headers: { Authorization: `Bearer ${token}` },
       });
-      
+
       // Fetch all users
-      const usersRes = await fetch("http://localhost:5000/api/admin/users", {
+      const usersRes = await fetch("https://contesthub-akhi.vercel.app/api/admin/users", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -64,7 +64,7 @@ export default function AdminDashboard({ user }) {
         const contestsList = contestsData.contests || [];
         setContests(contestsList);
         setFilteredContests(contestsList);
-        
+
         // Calculate stats
         setStats({
           totalUsers: 0, // Will be set from users data
@@ -79,7 +79,7 @@ export default function AdminDashboard({ user }) {
         const usersList = usersData.users || [];
         setUsers(usersList);
         setFilteredUsers(usersList);
-        
+
         // Update stats with user count
         setStats(prev => ({ ...prev, totalUsers: usersList.length }));
       }
@@ -93,7 +93,7 @@ export default function AdminDashboard({ user }) {
   const handleContestStatus = async (contestId, status) => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`http://localhost:5000/api/admin/contests/${contestId}/status`, {
+      const response = await fetch(`https://contesthub-akhi.vercel.app/api/admin/contests/${contestId}/status`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -116,10 +116,10 @@ export default function AdminDashboard({ user }) {
 
   const handleDeleteContest = async (contestId) => {
     if (!confirm("Are you sure you want to delete this contest? This action cannot be undone.")) return;
-    
+
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`http://localhost:5000/api/admin/contests/${contestId}`, {
+      const response = await fetch(`https://contesthub-akhi.vercel.app/api/admin/contests/${contestId}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -138,10 +138,10 @@ export default function AdminDashboard({ user }) {
 
   const handleUserRole = async (userId, newRole) => {
     if (!confirm(`Are you sure you want to change this user's role to ${newRole}?`)) return;
-    
+
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`http://localhost:5000/api/admin/users/${userId}/role`, {
+      const response = await fetch(`https://contesthub-akhi.vercel.app/api/admin/users/${userId}/role`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -183,7 +183,7 @@ export default function AdminDashboard({ user }) {
               <p className="text-red-100">Welcome back, {user.name}! You have full platform control.</p>
             </div>
           </div>
-          
+
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
             <div className="bg-white bg-opacity-20 dark:bg-gray-800 dark:bg-opacity-50 rounded-lg p-4">
@@ -253,31 +253,28 @@ export default function AdminDashboard({ user }) {
         <div className="flex flex-wrap gap-2 mb-8">
           <button
             onClick={() => setActiveTab("overview")}
-            className={`px-6 py-3 rounded-full font-medium transition-all ${
-              activeTab === "overview" 
-                ? "bg-red-600 text-white shadow-lg" 
+            className={`px-6 py-3 rounded-full font-medium transition-all ${activeTab === "overview"
+                ? "bg-red-600 text-white shadow-lg"
                 : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
-            }`}
+              }`}
           >
             📊 Overview
           </button>
           <button
             onClick={() => setActiveTab("contests")}
-            className={`px-6 py-3 rounded-full font-medium transition-all ${
-              activeTab === "contests" 
-                ? "bg-red-600 text-white shadow-lg" 
+            className={`px-6 py-3 rounded-full font-medium transition-all ${activeTab === "contests"
+                ? "bg-red-600 text-white shadow-lg"
                 : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
-            }`}
+              }`}
           >
             🎯 Contest Management
           </button>
           <button
             onClick={() => setActiveTab("users")}
-            className={`px-6 py-3 rounded-full font-medium transition-all ${
-              activeTab === "users" 
-                ? "bg-red-600 text-white shadow-lg" 
+            className={`px-6 py-3 rounded-full font-medium transition-all ${activeTab === "users"
+                ? "bg-red-600 text-white shadow-lg"
                 : "bg-white dark:bg-gray-800 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700"
-            }`}
+              }`}
           >
             👥 User Management
           </button>
@@ -297,26 +294,25 @@ export default function AdminDashboard({ user }) {
                   </div>
                 ) : (
                   contests.slice(0, 5).map((contest) => (
-                  <div key={contest._id} className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
-                    <img
-                      src={contest.imageURL || "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=50&h=50&fit=crop"}
-                      alt={contest.name}
-                      className="w-12 h-12 rounded-lg object-cover"
-                    />
-                    <div className="flex-1">
-                      <h4 className="font-medium text-gray-900">{contest.name}</h4>
-                      <p className="text-sm text-gray-500">{contest.type}</p>
+                    <div key={contest._id} className="flex items-center gap-4 p-3 bg-gray-50 rounded-lg">
+                      <img
+                        src={contest.imageURL || "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=50&h=50&fit=crop"}
+                        alt={contest.name}
+                        className="w-12 h-12 rounded-lg object-cover"
+                      />
+                      <div className="flex-1">
+                        <h4 className="font-medium text-gray-900">{contest.name}</h4>
+                        <p className="text-sm text-gray-500">{contest.type}</p>
+                      </div>
+                      <span className={`px-2 py-1 rounded-full text-xs font-medium ${contest.status === "confirmed"
+                          ? "bg-green-100 text-green-800"
+                          : contest.status === "rejected"
+                            ? "bg-red-100 text-red-800"
+                            : "bg-yellow-100 text-yellow-800"
+                        }`}>
+                        {contest.status}
+                      </span>
                     </div>
-                    <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                      contest.status === "confirmed"
-                        ? "bg-green-100 text-green-800"
-                        : contest.status === "rejected"
-                        ? "bg-red-100 text-red-800"
-                        : "bg-yellow-100 text-yellow-800"
-                    }`}>
-                      {contest.status}
-                    </span>
-                  </div>
                   ))
                 )}
               </div>
@@ -374,7 +370,7 @@ export default function AdminDashboard({ user }) {
                 </div>
               </div>
             </div>
-            
+
             {filteredContests.length === 0 ? (
               <div className="text-center py-12">
                 <div className="text-6xl mb-4">🎯</div>
@@ -382,7 +378,7 @@ export default function AdminDashboard({ user }) {
                   {searchTerm ? "No Matching Contests" : "No Contests Found"}
                 </h3>
                 <p className="text-gray-600">
-                  {searchTerm 
+                  {searchTerm
                     ? `No contests match "${searchTerm}". Try a different search term.`
                     : "No contests have been created yet."
                   }
@@ -434,13 +430,12 @@ export default function AdminDashboard({ user }) {
                         <td className="px-6 py-4 text-sm text-gray-900">{contest.type}</td>
                         <td className="px-6 py-4 text-sm font-medium text-green-600">${contest.prizeMoney}</td>
                         <td className="px-6 py-4">
-                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                            contest.status === "confirmed"
+                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${contest.status === "confirmed"
                               ? "bg-green-100 text-green-800"
                               : contest.status === "rejected"
-                              ? "bg-red-100 text-red-800"
-                              : "bg-yellow-100 text-yellow-800"
-                          }`}>
+                                ? "bg-red-100 text-red-800"
+                                : "bg-yellow-100 text-yellow-800"
+                            }`}>
                             {contest.status}
                           </span>
                         </td>
@@ -500,7 +495,7 @@ export default function AdminDashboard({ user }) {
                 </div>
               </div>
             </div>
-            
+
             {filteredUsers.length === 0 ? (
               <div className="text-center py-12">
                 <div className="text-6xl mb-4">👥</div>
@@ -508,7 +503,7 @@ export default function AdminDashboard({ user }) {
                   {searchTerm ? "No Matching Users" : "No Users Found"}
                 </h3>
                 <p className="text-gray-600">
-                  {searchTerm 
+                  {searchTerm
                     ? `No users match "${searchTerm}". Try a different search term.`
                     : "No users have registered yet."
                   }
@@ -554,13 +549,12 @@ export default function AdminDashboard({ user }) {
                         <td className="px-6 py-4 text-sm text-gray-900">{u.email}</td>
                         <td className="px-6 py-4">
                           <span
-                            className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                              u.role === "admin"
+                            className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${u.role === "admin"
                                 ? "bg-red-100 text-red-800"
                                 : u.role === "creator"
-                                ? "bg-blue-100 text-blue-800"
-                                : "bg-gray-100 text-gray-800"
-                            }`}
+                                  ? "bg-blue-100 text-blue-800"
+                                  : "bg-gray-100 text-gray-800"
+                              }`}
                           >
                             {u.role}
                           </span>

@@ -13,13 +13,13 @@ export default function CreatorDashboard({ user }) {
   const [selectedContestForSubmissions, setSelectedContestForSubmissions] = useState(null);
   const [userPackage, setUserPackage] = useState(null);
   const [canCreateContest, setCanCreateContest] = useState({ canCreate: false, reason: "" });
-  
+
   const { register, handleSubmit, formState: { errors }, reset, setValue, watch } = useForm();
   const [selectedDate, setSelectedDate] = useState(new Date());
-  
+
   const contestTypes = [
     "Logo Design",
-    "Article Writing", 
+    "Article Writing",
     "Web Design",
     "UI/UX",
     "Image Design"
@@ -34,10 +34,10 @@ export default function CreatorDashboard({ user }) {
   const fetchUserPackage = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:5000/api/user/package", {
+      const response = await fetch("https://contesthub-akhi.vercel.app/api/user/package", {
         headers: { Authorization: `Bearer ${token}` }
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         if (data.hasPackage) {
@@ -52,10 +52,10 @@ export default function CreatorDashboard({ user }) {
   const checkCanCreateContest = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:5000/api/user/can-create-contest", {
+      const response = await fetch("https://contesthub-akhi.vercel.app/api/user/can-create-contest", {
         headers: { Authorization: `Bearer ${token}` }
       });
-      
+
       if (response.ok) {
         const data = await response.json();
         setCanCreateContest(data);
@@ -68,7 +68,7 @@ export default function CreatorDashboard({ user }) {
   const fetchMyContests = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("http://localhost:5000/api/creator/contests", {
+      const response = await fetch("https://contesthub-akhi.vercel.app/api/creator/contests", {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -90,8 +90,8 @@ export default function CreatorDashboard({ user }) {
         ...data,
         deadline: selectedDate.toISOString(),
       };
-      
-      const response = await fetch("http://localhost:5000/api/contests", {
+
+      const response = await fetch("https://contesthub-akhi.vercel.app/api/contests", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -130,8 +130,8 @@ export default function CreatorDashboard({ user }) {
         ...data,
         deadline: selectedDate.toISOString(),
       };
-      
-      const response = await fetch(`http://localhost:5000/api/contests/${editingContest._id}`, {
+
+      const response = await fetch(`https://contesthub-akhi.vercel.app/api/contests/${editingContest._id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -161,7 +161,7 @@ export default function CreatorDashboard({ user }) {
 
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`http://localhost:5000/api/contests/${contestId}`, {
+      const response = await fetch(`https://contesthub-akhi.vercel.app/api/contests/${contestId}`, {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -181,7 +181,7 @@ export default function CreatorDashboard({ user }) {
   const fetchSubmissions = async (contestId) => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`http://localhost:5000/api/contests/${contestId}/submissions`, {
+      const response = await fetch(`https://contesthub-akhi.vercel.app/api/contests/${contestId}/submissions`, {
         headers: { Authorization: `Bearer ${token}` },
       });
 
@@ -198,10 +198,10 @@ export default function CreatorDashboard({ user }) {
 
   const handleDeclareWinner = async (contestId, winnerId) => {
     if (!confirm("Are you sure you want to declare this participant as winner?")) return;
-    
+
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch(`http://localhost:5000/api/contests/${contestId}/winner`, {
+      const response = await fetch(`https://contesthub-akhi.vercel.app/api/contests/${contestId}/winner`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -227,7 +227,7 @@ export default function CreatorDashboard({ user }) {
   const handleEditClick = (contest) => {
     setEditingContest(contest);
     setSelectedDate(new Date(contest.deadline));
-    
+
     // Pre-fill form
     setValue("name", contest.name);
     setValue("imageURL", contest.imageURL);
@@ -236,7 +236,7 @@ export default function CreatorDashboard({ user }) {
     setValue("taskInstruction", contest.taskInstruction);
     setValue("price", contest.price);
     setValue("prizeMoney", contest.prizeMoney);
-    
+
     setActiveTab("add-contest");
   };
 
@@ -251,7 +251,7 @@ export default function CreatorDashboard({ user }) {
         <div className="max-w-7xl mx-auto px-6">
           <h1 className="text-4xl font-bold mb-2">Creator Dashboard</h1>
           <p className="text-blue-100">Welcome back, {user.name}! Manage your contests and track submissions.</p>
-          
+
           {/* Package Info */}
           {userPackage ? (
             <div className="bg-white bg-opacity-20 rounded-lg p-4 mt-4">
@@ -259,7 +259,7 @@ export default function CreatorDashboard({ user }) {
                 <div>
                   <h3 className="font-bold text-white">Active Package: {userPackage.packageName}</h3>
                   <p className="text-blue-100 text-sm">
-                    {userPackage.contestLimit === -1 
+                    {userPackage.contestLimit === -1
                       ? "Unlimited contests remaining"
                       : `${userPackage.contestLimit - userPackage.contestsUsed} of ${userPackage.contestLimit} contests remaining`
                     }
@@ -289,7 +289,7 @@ export default function CreatorDashboard({ user }) {
               </div>
             </div>
           )}
-          
+
           {/* Stats Cards */}
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
             <div className="bg-white bg-opacity-20 rounded-lg p-4">
@@ -317,11 +317,10 @@ export default function CreatorDashboard({ user }) {
         <div className="flex flex-wrap gap-2 mb-8">
           <button
             onClick={() => setActiveTab("my-contests")}
-            className={`px-6 py-3 rounded-full font-medium transition-all ${
-              activeTab === "my-contests" 
-                ? "bg-blue-600 text-white shadow-lg" 
+            className={`px-6 py-3 rounded-full font-medium transition-all ${activeTab === "my-contests"
+                ? "bg-blue-600 text-white shadow-lg"
                 : "bg-white text-gray-700 hover:bg-gray-50"
-            }`}
+              }`}
           >
             📋 My Contests
           </button>
@@ -332,11 +331,10 @@ export default function CreatorDashboard({ user }) {
               reset();
               setSelectedDate(new Date());
             }}
-            className={`px-6 py-3 rounded-full font-medium transition-all ${
-              activeTab === "add-contest" 
-                ? "bg-green-600 text-white shadow-lg" 
+            className={`px-6 py-3 rounded-full font-medium transition-all ${activeTab === "add-contest"
+                ? "bg-green-600 text-white shadow-lg"
                 : "bg-white text-gray-700 hover:bg-gray-50"
-            }`}
+              }`}
           >
             ➕ Add Contest
           </button>
@@ -356,7 +354,7 @@ export default function CreatorDashboard({ user }) {
             <h2 className="text-2xl font-bold text-gray-800 mb-6">
               {editingContest ? "Edit Contest" : "Create New Contest"}
             </h2>
-            
+
             <form onSubmit={handleSubmit(editingContest ? handleEditContest : handleCreateContest)} className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 {/* Contest Name */}
@@ -491,7 +489,7 @@ export default function CreatorDashboard({ user }) {
               <h2 className="text-2xl font-bold text-gray-800">My Created Contests</h2>
               <p className="text-gray-600 mt-1">Manage all your contests in one place</p>
             </div>
-            
+
             {contests.length === 0 ? (
               <div className="text-center py-12">
                 <div className="text-6xl mb-4">📝</div>
@@ -554,13 +552,12 @@ export default function CreatorDashboard({ user }) {
                         </td>
                         <td className="px-6 py-4 text-sm text-gray-900">{contest.type}</td>
                         <td className="px-6 py-4">
-                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${
-                            contest.status === "confirmed"
+                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${contest.status === "confirmed"
                               ? "bg-green-100 text-green-800"
                               : contest.status === "rejected"
-                              ? "bg-red-100 text-red-800"
-                              : "bg-yellow-100 text-yellow-800"
-                          }`}>
+                                ? "bg-red-100 text-red-800"
+                                : "bg-yellow-100 text-yellow-800"
+                            }`}>
                             {contest.status}
                           </span>
                         </td>
@@ -623,7 +620,7 @@ export default function CreatorDashboard({ user }) {
                 </button>
               </div>
             </div>
-            
+
             {submissions.length === 0 ? (
               <div className="text-center py-12">
                 <div className="text-6xl mb-4">📝</div>
@@ -648,17 +645,17 @@ export default function CreatorDashboard({ user }) {
                               <p className="text-sm text-gray-600">{submission.user?.email}</p>
                             </div>
                           </div>
-                          
+
                           <div className="bg-gray-50 p-4 rounded-lg">
                             <h5 className="font-medium text-gray-800 mb-2">Submitted Work:</h5>
                             <p className="text-gray-700 whitespace-pre-wrap">{submission.submissionLink}</p>
                           </div>
-                          
+
                           <p className="text-sm text-gray-500 mt-3">
                             Submitted: {new Date(submission.submittedAt).toLocaleString()}
                           </p>
                         </div>
-                        
+
                         <div className="ml-6">
                           <button
                             onClick={() => handleDeclareWinner(selectedContestForSubmissions, submission.userId)}
