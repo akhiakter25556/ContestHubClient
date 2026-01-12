@@ -248,7 +248,8 @@ export default function Home() {
 
             <div className="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg hover:shadow-xl transition-shadow">
               <div className="text-center">
-                <div className="w-16 h-16 bg-gradient-to-r from-blue-400 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                <div className="w-16 h-16 bg-gradient-to-r from-blue-400 to-purple-500
+                 rounded-full flex items-center justify-center mx-auto mb-4">
                   <span className="text-2xl">🥈</span>
                 </div>
                 <h3 className="text-xl font-bold text-gray-800 dark:text-white mb-2">Mike Chen</h3>
@@ -272,30 +273,30 @@ export default function Home() {
           </div>
 
           {/* Stats Section */}
-          <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-2xl p-8 text-white text-center">
+          <div className="rounded-2xl p-8 text-black text-center">
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div>
                 <div className="text-3xl font-bold mb-2">2,500+</div>
-                <div className="text-purple-200">Total Winners</div>
+                <div className="text-gray-500">Total Winners</div>
               </div>
               <div>
                 <div className="text-3xl font-bold mb-2">$125,000+</div>
-                <div className="text-purple-200">Prizes Awarded</div>
+                <div className="text-gray-500">Prizes Awarded</div>
               </div>
               <div>
                 <div className="text-3xl font-bold mb-2">15,000+</div>
-                <div className="text-purple-200">Active Participants</div>
+                <div className="text-gray-500">Active Participants</div>
               </div>
               <div>
                 <div className="text-3xl font-bold mb-2">500+</div>
-                <div className="text-purple-200">Contests Completed</div>
+                <div className="text-gray-500">Contests Completed</div>
               </div>
             </div>
             <div className="mt-8">
               <h3 className="text-2xl font-bold mb-4">Ready to Join the Winners Circle?</h3>
               <Link
                 to={isLoggedIn ? "/all-contests" : "/register"}
-                className="bg-white text-purple-600 px-8 py-3 rounded-full font-semibold hover:bg-gray-100 transition-colors inline-block"
+                className="bg-gradient-to-r from-purple-600 to-blue-600  text-white px-8 py-3 rounded-full font-semibold hover:bg-gray-100 transition-colors inline-block"
               >
                 {isLoggedIn ? "Browse Contests" : "Start Your Journey"}
               </Link>

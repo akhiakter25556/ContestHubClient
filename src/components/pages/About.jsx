@@ -85,10 +85,10 @@ export default function About() {
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Hero Section */}
-      <div className="bg-gradient-to-r from-blue-500 to-purple-800 text-white py-20">
+      <div className=" text-black py-20">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-5xl font-bold mb-6">About ContestHub</h1>
-          <p className="text-xl text-red-100 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl text-gray-500 max-w-3xl mx-auto leading-relaxed">
             We're on a mission to democratize creativity by connecting talented individuals 
             with meaningful opportunities to showcase their skills and win amazing prizes.
           </p>
@@ -249,7 +249,7 @@ export default function About() {
                     <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-1">
                       {member.name}
                     </h3>
-                    <p className="text-red-600 dark:text-red-400 font-medium mb-3">
+                    <p className="text-gray-600 dark:text-red-400 font-medium mb-3">
                       {member.role}
                     </p>
                     <p className="text-gray-600 dark:text-gray-400 text-sm leading-relaxed">

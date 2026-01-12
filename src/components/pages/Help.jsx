@@ -137,15 +137,15 @@ export default function Help() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-200 dark:bg-gray-900">
       {/* Header */}
-      <div className="bg-gradient-to-r from-blue-500 to-purple-800 text-white py-16">
+      <div className=" text-black py-16">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-white bg-opacity-20 rounded-full mb-4">
             <span className="text-2xl">❓</span>
           </div>
           <h1 className="text-4xl font-bold mb-4">Help Center</h1>
-          <p className="text-xl text-red-100 max-w-2xl mx-auto">
+          <p className="text-xl text-gray-500 max-w-2xl mx-auto">
             Find answers to common questions and get the help you need to succeed on ContestHub
           </p>
         </div>
@@ -254,13 +254,13 @@ export default function Help() {
       </div>
 
       {/* Contact Support */}
-      <div className="bg-gradient-to-r from-blue-500 to-purple-800 text-white py-16">
+      <div className=" text-black py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <div className="inline-flex items-center justify-center w-16 h-16 bg-white bg-opacity-20 rounded-full mb-4">
             <span className="text-2xl">💬</span>
           </div>
           <h2 className="text-3xl font-bold mb-4">Still Need Help?</h2>
-          <p className="text-xl text-red-100 mb-8">
+          <p className="text-xl text-gray-500 mb-8">
             Can't find what you're looking for? Our support team is here to help you succeed.
           </p>
           <div className="space-x-4">
@@ -273,7 +273,7 @@ export default function Help() {
             </a>
             <a
               href="/about"
-              className="border-2 border-white text-white
+              className="border-2 border-white text-black
                px-8 py-3 rounded-lg font-medium hover:bg-white hover:text-black transition-colors inline-block"
             >
               Learn More About Us

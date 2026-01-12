@@ -10,12 +10,12 @@ export default function Footer() {
                     {/* Logo & Name */}
                     <div className="md:col-span-2">
                         <div className="flex items-center gap-3 mb-4">
-                            <div className="bg-gradient-to-tr from-blue-600 to-indigo-500 p-2 rounded-xl shadow-lg">
-                                <img 
-                                    src="https://cdn-icons-png.flaticon.com/512/3176/3176363.png" 
-                                    alt="ContestHub Logo" 
-                                    className="w-6 h-6"
-                                />
+                            <div className="  ">
+                              <img
+            src="https://i.ibb.co/7x7MMxyK/log-removebg-preview.png"
+            alt="ContestHub"
+            className="h-29 w-auto"
+          />
                             </div>
                             <h2 className="text-2xl font-bold">
                                 Contest<span className="">Hub</span>
