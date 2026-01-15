@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useForm } from "react-hook-form";
+import useAuth from "../../hook/useAuth";
+import { toast } from "react-toastify";
 
 export default function Login() {
   const navigate = useNavigate();
@@ -8,6 +10,9 @@ export default function Login() {
   const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+
+const { signInGoogle } = useAuth();
+
 
   const {
     register,
@@ -54,17 +59,15 @@ export default function Login() {
     }
   };
 
-  const handleGoogleSignIn = () => {
-    // For demo purposes, we'll simulate Google Sign-in
-    setError("");
-    setSuccess("");
-    setLoading(true);
-
-    // Simulate Google OAuth flow
-    setTimeout(() => {
-      setError("Google Sign-in is not configured yet. Please use email/password login.");
-      setLoading(false);
-    }, 1000);
+const handleGoogleSignIn = async () => {
+    try {
+      await signInGoogle();
+      toast.success("Google login successful!");
+      navigate(location?.state || "/");
+    } catch (error) {
+      console.log(error);
+      toast.error("Google login failed. Please try again.");
+    }
   };
 
   return (

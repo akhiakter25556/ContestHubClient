@@ -4,7 +4,6 @@ import { createBrowserRouter, RouterProvider } from 'react-router-dom'
 import { ToastContainer } from 'react-toastify'
 import 'react-toastify/dist/ReactToastify.css'
 import './index.css'
-
 import { ThemeProvider } from './contexts/ThemeContext.jsx'
 import AppLayout from './components/AppLayout.jsx'
 import Home from './components/pages/Home.jsx'
@@ -19,6 +18,7 @@ import Login from './components/pages/Login.jsx'
 import Register from './components/pages/Register.jsx'
 import Dashboard from './components/Dashboard/Dashboard.jsx'
 import NotFound from './components/pages/NotFound.jsx'
+import AuthProvider from './components/pages/Context/AuthProvider.jsx'
 
 const router = createBrowserRouter([
   {
@@ -44,7 +44,7 @@ const router = createBrowserRouter([
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <ThemeProvider>
-      <RouterProvider router={router} />
+    <AuthProvider>  <RouterProvider router={router} /></AuthProvider>
       <ToastContainer position="top-center" autoClose={2000} />
     </ThemeProvider>
   </StrictMode>

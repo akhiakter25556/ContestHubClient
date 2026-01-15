@@ -264,22 +264,22 @@ export default function About() {
       </div>
 
       {/* CTA Section */}
-      <div className="bg-gradient-to-r from-blue-500 to-purple-800 text-white py-16">
+      <div className=" text-black py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold mb-4">Ready to Showcase Your Talent?</h2>
-          <p className="text-xl text-red-100 mb-8">
+          <p className="text-xl text-gray-500 mb-8">
             Join thousands of creators who are already winning contests and building their careers.
           </p>
           <div className="space-x-4">
             <a
               href="/register"
-              className="bg-white text-black px-8 py-3 rounded-lg font-medium hover:bg-gray-100 transition-colors inline-block"
+              className="bg-gray-100 text-black px-8 py-3 rounded-lg font-medium hover:bg-gray-100 transition-colors inline-block"
             >
               Get Started Today
             </a>
             <a
               href="/all-contests"
-              className="border-2 border-white text-white px-8 py-3 rounded-lg font-medium hover:bg-white hover:text-red-600 transition-colors inline-block"
+              className="border-2 border-gray-100 text-black px-8 py-3 rounded-lg font-medium hover:bg-gray-100 hover:text-gray-600 transition-colors inline-block"
             >
               Browse Contests
             </a>

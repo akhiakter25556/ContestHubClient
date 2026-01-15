@@ -284,17 +284,17 @@ export default function Help() {
             <div>
               <div className="text-2xl mb-2">📧</div>
               <h3 className="font-bold mb-1">Email Support</h3>
-              <p className="text-red-100 text-sm">support@contesthub.com</p>
+              <p className="text-gray-500 text-sm">support@contesthub.com</p>
             </div>
             <div>
               <div className="text-2xl mb-2">⏰</div>
               <h3 className="font-bold mb-1">Response Time</h3>
-              <p className="text-red-100 text-sm">Within 24 hours</p>
+              <p className="text-gray-500 text-sm">Within 24 hours</p>
             </div>
             <div>
               <div className="text-2xl mb-2">🌍</div>
               <h3 className="font-bold mb-1">Available</h3>
-              <p className="text-red-100 text-sm">24/7 Support</p>
+              <p className="text-gray-500 text-sm">24/7 Support</p>
             </div>
           </div>
         </div>

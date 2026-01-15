@@ -106,7 +106,7 @@ export default function Home() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Search contests (Logo, Web, Writing...)"
-            className="w-full px-6 py-4 text-lg text-gray-800 rounded-full shadow-xl focus:outline-none focus:ring-4 focus:ring-green-400"
+            className="w-full px-6 py-4 text-lg text-gray-100 rounded-full shadow-xl focus:outline-none focus:ring-4 focus:ring-green-400"
           />
 
           <motion.button
@@ -211,7 +211,8 @@ export default function Home() {
                     variants={buttonVariants}
                     whileHover="hover"
                     whileTap="tap"
-                    className="w-full bg-blue-500 text-white px-3 py-2 rounded hover:bg-blue-600 transition-colors"
+                    className="w-full bg-gradient-to-r from-green-500 to-blue-500
+          text-white px-3 py-2 rounded hover:bg-blue-600 transition-colors"
                   >
                     Details
                   </motion.button>
@@ -296,7 +297,8 @@ export default function Home() {
               <h3 className="text-2xl font-bold mb-4">Ready to Join the Winners Circle?</h3>
               <Link
                 to={isLoggedIn ? "/all-contests" : "/register"}
-                className="bg-gradient-to-r from-purple-600 to-blue-600  text-white px-8 py-3 rounded-full font-semibold hover:bg-gray-100 transition-colors inline-block"
+                className="bg-gradient-to-r from-green-500 to-blue-500
+          text-white px-8 py-3 rounded-full font-semibold hover:bg-gray-100 transition-colors inline-block"
               >
                 {isLoggedIn ? "Browse Contests" : "Start Your Journey"}
               </Link>
@@ -379,7 +381,8 @@ export default function Home() {
                 ) : (
                   <Link
                     to="/all-contests"
-                    className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-full text-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300"
+                    className="bg-gradient-to-r from-green-500 to-blue-500
+          text-white px-8 py-3 rounded-full text-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all duration-300"
                   >
                     Browse Contests Now
                   </Link>
