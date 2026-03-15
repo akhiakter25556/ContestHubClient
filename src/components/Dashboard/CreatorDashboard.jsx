@@ -1,677 +1,397 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import {
+  FaTachometerAlt, FaListAlt, FaPlus, FaFileAlt,
+  FaSignOutAlt, FaBars, FaTimes, FaEdit, FaTrash,
+  FaTrophy, FaUsers, FaClock, FaChartLine, FaBoxOpen
+} from "react-icons/fa";
 
 export default function CreatorDashboard({ user }) {
   const [contests, setContests] = useState([]);
-  const [activeTab, setActiveTab] = useState("my-contests");
+  const [activeTab, setActiveTab] = useState("overview");
   const [loading, setLoading] = useState(true);
-  const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingContest, setEditingContest] = useState(null);
   const [submissions, setSubmissions] = useState([]);
-  const [selectedContestForSubmissions, setSelectedContestForSubmissions] = useState(null);
+  const [selectedContestId, setSelectedContestId] = useState(null);
   const [userPackage, setUserPackage] = useState(null);
-  const [canCreateContest, setCanCreateContest] = useState({ canCreate: false, reason: "" });
-
-  const { register, handleSubmit, formState: { errors }, reset, setValue, watch } = useForm();
+  const [canCreate, setCanCreate] = useState({ canCreate: false, reason: "" });
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const [selectedDate, setSelectedDate] = useState(new Date());
 
-  const contestTypes = [
-    "Logo Design",
-    "Article Writing",
-    "Web Design",
-    "UI/UX",
-    "Image Design"
-  ];
+  const { register, handleSubmit, formState: { errors }, reset, setValue } = useForm();
 
-  useEffect(() => {
-    fetchMyContests();
-    fetchUserPackage();
-    checkCanCreateContest();
-  }, []);
+  const contestTypes = ["Logo Design", "Article Writing", "Web Design", "UI/UX", "Image Design"];
+
+  useEffect(() => { fetchMyContests(); fetchUserPackage(); checkCanCreate(); }, []);
 
   const fetchUserPackage = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("https://contesthub-akhi.vercel.app/api/user/package", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        if (data.hasPackage) {
-          setUserPackage(data.package);
-        }
-      }
-    } catch (error) {
-      console.error("Failed to fetch user package:", error);
-    }
+      const res = await fetch("https://contesthub-akhi.vercel.app/api/user/package", { headers: { Authorization: `Bearer ${token}` } });
+      if (res.ok) { const d = await res.json(); if (d.hasPackage) setUserPackage(d.package); }
+    } catch (e) { }
   };
 
-  const checkCanCreateContest = async () => {
+  const checkCanCreate = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("https://contesthub-akhi.vercel.app/api/user/can-create-contest", {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setCanCreateContest(data);
-      }
-    } catch (error) {
-      console.error("Failed to check contest creation ability:", error);
-    }
+      const res = await fetch("https://contesthub-akhi.vercel.app/api/user/can-create-contest", { headers: { Authorization: `Bearer ${token}` } });
+      if (res.ok) setCanCreate(await res.json());
+    } catch (e) { }
   };
 
   const fetchMyContests = async () => {
     try {
       const token = localStorage.getItem("token");
-      const response = await fetch("https://contesthub-akhi.vercel.app/api/creator/contests", {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const res = await fetch("https://contesthub-akhi.vercel.app/api/creator/contests", { headers: { Authorization: `Bearer ${token}` } });
+      if (res.ok) { const d = await res.json(); setContests(d.contests || []); }
+    } catch (e) { } finally { setLoading(false); }
+  };
 
-      if (response.ok) {
-        const data = await response.json();
-        setContests(data.contests || []);
-      }
-    } catch (error) {
-      console.error("Failed to fetch contests:", error);
-    } finally {
-      setLoading(false);
+  const onSubmit = async (data) => {
+    const token = localStorage.getItem("token");
+    const url = editingContest ? `https://contesthub-akhi.vercel.app/api/contests/${editingContest._id}` : "https://contesthub-akhi.vercel.app/api/contests";
+    const method = editingContest ? "PUT" : "POST";
+    const res = await fetch(url, {
+      method, headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ ...data, deadline: selectedDate.toISOString() }),
+    });
+    if (res.ok) {
+      setEditingContest(null); reset(); setSelectedDate(new Date());
+      setActiveTab("contests"); fetchMyContests(); fetchUserPackage(); checkCanCreate();
+    } else {
+      const d = await res.json();
+      if (d.requiresPackage) window.location.href = "/packages";
     }
   };
 
-  const handleCreateContest = async (data) => {
-    try {
-      const token = localStorage.getItem("token");
-      const contestData = {
-        ...data,
-        deadline: selectedDate.toISOString(),
-      };
-
-      const response = await fetch("https://contesthub-akhi.vercel.app/api/contests", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(contestData),
-      });
-
-      if (response.ok) {
-        alert("Contest created successfully! Waiting for admin approval.");
-        setShowCreateForm(false);
-        reset();
-        setSelectedDate(new Date());
-        fetchMyContests();
-        fetchUserPackage(); // Refresh package info
-        checkCanCreateContest(); // Check if can still create contests
-      } else {
-        const responseData = await response.json();
-        if (responseData.requiresPackage) {
-          alert("You need to purchase a package to create contests. Redirecting to packages page...");
-          window.location.href = "/packages";
-        } else {
-          alert(responseData.message || "Failed to create contest");
-        }
-      }
-    } catch (error) {
-      console.error("Error creating contest:", error);
-      alert("Error creating contest");
-    }
+  const handleDelete = async (id) => {
+    if (!confirm("Delete this contest?")) return;
+    const token = localStorage.getItem("token");
+    const res = await fetch(`https://contesthub-akhi.vercel.app/api/contests/${id}`, { method: "DELETE", headers: { Authorization: `Bearer ${token}` } });
+    if (res.ok) fetchMyContests();
   };
 
-  const handleEditContest = async (data) => {
-    try {
-      const token = localStorage.getItem("token");
-      const contestData = {
-        ...data,
-        deadline: selectedDate.toISOString(),
-      };
-
-      const response = await fetch(`https://contesthub-akhi.vercel.app/api/contests/${editingContest._id}`, {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify(contestData),
-      });
-
-      if (response.ok) {
-        alert("Contest updated successfully!");
-        setEditingContest(null);
-        reset();
-        setSelectedDate(new Date());
-        fetchMyContests();
-      } else {
-        const responseData = await response.json();
-        alert(responseData.message || "Failed to update contest");
-      }
-    } catch (error) {
-      console.error("Error updating contest:", error);
-      alert("Error updating contest");
-    }
+  const fetchSubmissions = async (id) => {
+    const token = localStorage.getItem("token");
+    const res = await fetch(`https://contesthub-akhi.vercel.app/api/contests/${id}/submissions`, { headers: { Authorization: `Bearer ${token}` } });
+    if (res.ok) { const d = await res.json(); setSubmissions(d.submissions || []); setSelectedContestId(id); setActiveTab("submissions"); }
   };
 
-  const handleDeleteContest = async (contestId) => {
-    if (!confirm("Are you sure you want to delete this contest?")) return;
-
-    try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(`https://contesthub-akhi.vercel.app/api/contests/${contestId}`, {
-        method: "DELETE",
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (response.ok) {
-        alert("Contest deleted successfully!");
-        fetchMyContests();
-      } else {
-        alert("Failed to delete contest");
-      }
-    } catch (error) {
-      console.error("Error deleting contest:", error);
-      alert("Error deleting contest");
-    }
+  const handleWinner = async (contestId, winnerId) => {
+    if (!confirm("Declare winner?")) return;
+    const token = localStorage.getItem("token");
+    const res = await fetch(`https://contesthub-akhi.vercel.app/api/contests/${contestId}/winner`, {
+      method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      body: JSON.stringify({ winnerId }),
+    });
+    if (res.ok) { fetchMyContests(); setActiveTab("contests"); }
   };
 
-  const fetchSubmissions = async (contestId) => {
-    try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(`https://contesthub-akhi.vercel.app/api/contests/${contestId}/submissions`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setSubmissions(data.submissions || []);
-        setSelectedContestForSubmissions(contestId);
-        setActiveTab("submissions");
-      }
-    } catch (error) {
-      console.error("Failed to fetch submissions:", error);
-    }
-  };
-
-  const handleDeclareWinner = async (contestId, winnerId) => {
-    if (!confirm("Are you sure you want to declare this participant as winner?")) return;
-
-    try {
-      const token = localStorage.getItem("token");
-      const response = await fetch(`https://contesthub-akhi.vercel.app/api/contests/${contestId}/winner`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-        body: JSON.stringify({ winnerId }),
-      });
-
-      if (response.ok) {
-        alert("Winner declared successfully!");
-        fetchMyContests();
-        setActiveTab("my-contests");
-      } else {
-        const data = await response.json();
-        alert(data.message || "Failed to declare winner");
-      }
-    } catch (error) {
-      console.error("Error declaring winner:", error);
-      alert("Error declaring winner");
-    }
-  };
-
-  const handleEditClick = (contest) => {
-    setEditingContest(contest);
-    setSelectedDate(new Date(contest.deadline));
-
-    // Pre-fill form
-    setValue("name", contest.name);
-    setValue("imageURL", contest.imageURL);
-    setValue("description", contest.description);
-    setValue("type", contest.type);
-    setValue("taskInstruction", contest.taskInstruction);
-    setValue("price", contest.price);
-    setValue("prizeMoney", contest.prizeMoney);
-
+  const handleEditClick = (c) => {
+    setEditingContest(c); setSelectedDate(new Date(c.deadline));
+    setValue("name", c.name); setValue("imageURL", c.imageURL); setValue("description", c.description);
+    setValue("type", c.type); setValue("taskInstruction", c.taskInstruction);
+    setValue("price", c.price); setValue("prizeMoney", c.prizeMoney);
     setActiveTab("add-contest");
   };
 
-  if (loading) return <div className="p-6">Loading creator dashboard...</div>;
+  const stats = [
+    { label: "Total Contests", value: contests.length, icon: <FaListAlt />, light: "bg-blue-50 dark:bg-blue-900/20", text: "text-blue-600" },
+    { label: "Pending", value: contests.filter(c => c.status === "pending").length, icon: <FaClock />, light: "bg-amber-50 dark:bg-amber-900/20", text: "text-amber-600" },
+    { label: "Active", value: contests.filter(c => c.status === "confirmed").length, icon: <FaChartLine />, light: "bg-emerald-50 dark:bg-emerald-900/20", text: "text-emerald-600" },
+    { label: "Participants", value: contests.reduce((s, c) => s + (c.participants?.length || 0), 0), icon: <FaUsers />, light: "bg-violet-50 dark:bg-violet-900/20", text: "text-violet-600" },
+  ];
 
-  if (loading) return <div className="p-6">Loading creator dashboard...</div>;
+  const navItems = [
+    { id: "overview", label: "Overview", icon: <FaTachometerAlt /> },
+    { id: "contests", label: "My Contests", icon: <FaListAlt /> },
+    { id: "add-contest", label: "Add Contest", icon: <FaPlus /> },
+  ];
+
+  if (loading) return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-gray-950">
+      <div className="text-center">
+        <div className="w-10 h-10 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+        <p className="text-sm text-gray-500">Loading...</p>
+      </div>
+    </div>
+  );
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <div className="bg-gradient-to-r from-blue-600 to-purple-600 text-white py-8">
-        <div className="max-w-7xl mx-auto px-6">
-          <h1 className="text-4xl font-bold mb-2">Creator Dashboard</h1>
-          <p className="text-blue-100">Welcome back, {user.name}! Manage your contests and track submissions.</p>
-
-          {/* Package Info */}
-          {userPackage ? (
-            <div className="bg-white bg-opacity-20 rounded-lg p-4 mt-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-bold text-white">Active Package: {userPackage.packageName}</h3>
-                  <p className="text-blue-100 text-sm">
-                    {userPackage.contestLimit === -1
-                      ? "Unlimited contests remaining"
-                      : `${userPackage.contestLimit - userPackage.contestsUsed} of ${userPackage.contestLimit} contests remaining`
-                    }
-                  </p>
-                </div>
-                <div className="text-right">
-                  <div className="text-2xl font-bold text-white">
-                    {userPackage.contestLimit === -1 ? "∞" : userPackage.contestLimit - userPackage.contestsUsed}
-                  </div>
-                  <div className="text-xs text-blue-100">contests left</div>
-                </div>
-              </div>
+    <div className="flex min-h-screen bg-gray-50 dark:bg-gray-950">
+      {/* Sidebar */}
+      <aside className={`fixed inset-y-0 left-0 z-40 w-64 bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 flex flex-col transition-transform duration-300 ${sidebarOpen ? "translate-x-0" : "-translate-x-full"} lg:translate-x-0 lg:static lg:inset-auto`}>
+        <div className="px-6 py-5 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-violet-600 flex items-center justify-center text-white font-bold shadow">
+              {user?.displayName?.[0]?.toUpperCase() || "C"}
             </div>
-          ) : (
-            <div className="bg-red-500 bg-opacity-20 border border-red-300 rounded-lg p-4 mt-4">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-bold text-white">No Active Package</h3>
-                  <p className="text-red-100 text-sm">Purchase a package to create contests</p>
-                </div>
-                <a
-                  href="/packages"
-                  className="bg-white text-red-600 px-4 py-2 rounded-lg font-medium hover:bg-gray-100 transition-colors"
-                >
-                  View Packages
-                </a>
-              </div>
-            </div>
-          )}
-
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
-            <div className="bg-white bg-opacity-20 rounded-lg p-4">
-              <h3 className="text-sm font-medium text-blue-100">Total Contests</h3>
-              <p className="text-2xl font-bold">{contests.length}</p>
-            </div>
-            <div className="bg-white bg-opacity-20 rounded-lg p-4">
-              <h3 className="text-sm font-medium text-blue-100">Pending Approval</h3>
-              <p className="text-2xl font-bold">{contests.filter(c => c.status === 'pending').length}</p>
-            </div>
-            <div className="bg-white bg-opacity-20 rounded-lg p-4">
-              <h3 className="text-sm font-medium text-blue-100">Active Contests</h3>
-              <p className="text-2xl font-bold">{contests.filter(c => c.status === 'confirmed').length}</p>
-            </div>
-            <div className="bg-white bg-opacity-20 rounded-lg p-4">
-              <h3 className="text-sm font-medium text-blue-100">Total Participants</h3>
-              <p className="text-2xl font-bold">{contests.reduce((sum, c) => sum + (c.participants?.length || 0), 0)}</p>
+            <div>
+              <p className="text-sm font-bold text-gray-900 dark:text-white truncate max-w-[110px]">{user?.displayName || "Creator"}</p>
+              <p className="text-xs text-blue-500 font-semibold">Creator</p>
             </div>
           </div>
+          <button onClick={() => setSidebarOpen(false)} className="lg:hidden text-gray-400"><FaTimes /></button>
         </div>
-      </div>
 
-      <div className="max-w-7xl mx-auto px-6 py-8">
-        {/* Navigation Tabs */}
-        <div className="flex flex-wrap gap-2 mb-8">
-          <button
-            onClick={() => setActiveTab("my-contests")}
-            className={`px-6 py-3 rounded-full font-medium transition-all ${activeTab === "my-contests"
-                ? "bg-blue-600 text-white shadow-lg"
-                : "bg-white text-gray-700 hover:bg-gray-50"
-              }`}
-          >
-            📋 My Contests
-          </button>
-          <button
-            onClick={() => {
-              setActiveTab("add-contest");
-              setEditingContest(null);
-              reset();
-              setSelectedDate(new Date());
-            }}
-            className={`px-6 py-3 rounded-full font-medium transition-all ${activeTab === "add-contest"
-                ? "bg-green-600 text-white shadow-lg"
-                : "bg-white text-gray-700 hover:bg-gray-50"
-              }`}
-          >
-            ➕ Add Contest
-          </button>
+        {/* Package info */}
+        <div className="mx-3 mt-4 p-3 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-800">
+          <div className="flex items-center gap-2 mb-1">
+            <FaBoxOpen className="text-blue-500 text-xs" />
+            <p className="text-xs font-bold text-blue-700 dark:text-blue-400">
+              {userPackage ? userPackage.packageName : "No Package"}
+            </p>
+          </div>
+          <p className="text-[10px] text-blue-500">
+            {userPackage
+              ? userPackage.contestLimit === -1 ? "Unlimited contests" : `${userPackage.contestLimit - userPackage.contestsUsed} contests left`
+              : <a href="/packages" className="underline">Buy a package →</a>}
+          </p>
+        </div>
+
+        <nav className="flex-1 px-3 py-4 space-y-1">
+          <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest px-3 mb-3">Creator Panel</p>
+          {navItems.map(item => (
+            <button key={item.id} onClick={() => { setActiveTab(item.id); setSidebarOpen(false); if (item.id === "add-contest") { setEditingContest(null); reset(); } }}
+              className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${activeTab === item.id ? "bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400" : "text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"}`}>
+              <span className={`text-base ${activeTab === item.id ? "text-blue-500" : "text-gray-400"}`}>{item.icon}</span>
+              {item.label}
+            </button>
+          ))}
           {activeTab === "submissions" && (
-            <button
-              onClick={() => setActiveTab("submissions")}
-              className="px-6 py-3 rounded-full font-medium bg-purple-600 text-white shadow-lg"
-            >
-              📝 Submissions
+            <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium bg-violet-50 text-violet-600">
+              <FaFileAlt className="text-violet-500" /> Submissions
             </button>
           )}
+        </nav>
+
+        <div className="px-3 py-4 border-t border-gray-100 dark:border-gray-800">
+          <button className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-gray-500 hover:bg-red-50 hover:text-red-600 transition-all">
+            <FaSignOutAlt /> Logout
+          </button>
         </div>
+      </aside>
 
-        {/* Add/Edit Contest Form */}
-        {activeTab === "add-contest" && (
-          <div className="bg-white rounded-2xl shadow-lg p-8">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6">
-              {editingContest ? "Edit Contest" : "Create New Contest"}
-            </h2>
+      {sidebarOpen && <div className="fixed inset-0 z-30 bg-black/40 lg:hidden" onClick={() => setSidebarOpen(false)} />}
 
-            <form onSubmit={handleSubmit(editingContest ? handleEditContest : handleCreateContest)} className="space-y-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {/* Contest Name */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Contest Name *</label>
-                  <input
-                    {...register("name", { required: "Contest name is required" })}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="Enter contest name"
-                  />
-                  {errors.name && <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>}
-                </div>
-
-                {/* Contest Type */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Contest Type *</label>
-                  <select
-                    {...register("type", { required: "Contest type is required" })}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  >
-                    {contestTypes.map(type => (
-                      <option key={type} value={type}>{type}</option>
-                    ))}
-                  </select>
-                  {errors.type && <p className="text-red-500 text-sm mt-1">{errors.type.message}</p>}
-                </div>
-
-                {/* Entry Price */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Entry Price ($) *</label>
-                  <input
-                    type="number"
-                    {...register("price", { required: "Entry price is required", min: 0 })}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="0"
-                  />
-                  {errors.price && <p className="text-red-500 text-sm mt-1">{errors.price.message}</p>}
-                </div>
-
-                {/* Prize Money */}
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">Prize Money ($) *</label>
-                  <input
-                    type="number"
-                    {...register("prizeMoney", { required: "Prize money is required", min: 0 })}
-                    className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                    placeholder="0"
-                  />
-                  {errors.prizeMoney && <p className="text-red-500 text-sm mt-1">{errors.prizeMoney.message}</p>}
-                </div>
-              </div>
-
-              {/* Image URL */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Contest Image URL</label>
-                <input
-                  type="url"
-                  {...register("imageURL")}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="https://example.com/image.jpg"
-                />
-              </div>
-
-              {/* Description */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Description *</label>
-                <textarea
-                  {...register("description", { required: "Description is required" })}
-                  rows="4"
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Describe your contest..."
-                />
-                {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description.message}</p>}
-              </div>
-
-              {/* Task Instructions */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Task Instructions *</label>
-                <textarea
-                  {...register("taskInstruction", { required: "Task instructions are required" })}
-                  rows="4"
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholder="Provide detailed instructions for participants..."
-                />
-                {errors.taskInstruction && <p className="text-red-500 text-sm mt-1">{errors.taskInstruction.message}</p>}
-              </div>
-
-              {/* Deadline */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">Contest Deadline *</label>
-                <DatePicker
-                  selected={selectedDate}
-                  onChange={(date) => setSelectedDate(date)}
-                  showTimeSelect
-                  timeFormat="HH:mm"
-                  timeIntervals={15}
-                  dateFormat="MMMM d, yyyy h:mm aa"
-                  minDate={new Date()}
-                  className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                  placeholderText="Select deadline"
-                />
-              </div>
-
-              {/* Submit Buttons */}
-              <div className="flex gap-4 pt-4">
-                <button
-                  type="submit"
-                  className="bg-gradient-to-r from-blue-600 to-purple-600 text-white px-8 py-3 rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all"
-                >
-                  {editingContest ? "Update Contest" : "Create Contest"}
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setActiveTab("my-contests");
-                    setEditingContest(null);
-                    reset();
-                  }}
-                  className="bg-gray-200 text-gray-700 px-8 py-3 rounded-lg font-semibold hover:bg-gray-300 transition-colors"
-                >
-                  Cancel
-                </button>
-              </div>
-            </form>
-          </div>
-        )}
-
-        {/* My Contests Table */}
-        {activeTab === "my-contests" && (
-          <div className="bg-white rounded-2xl shadow-lg overflow-hidden">
-            <div className="p-6 border-b border-gray-200">
-              <h2 className="text-2xl font-bold text-gray-800">My Created Contests</h2>
-              <p className="text-gray-600 mt-1">Manage all your contests in one place</p>
+      {/* Main */}
+      <div className="flex-1 flex flex-col min-w-0">
+        <header className="bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 px-6 py-4 flex items-center justify-between sticky top-0 z-20">
+          <div className="flex items-center gap-4">
+            <button onClick={() => setSidebarOpen(true)} className="lg:hidden text-gray-500"><FaBars size={20} /></button>
+            <div>
+              <h1 className="text-lg font-bold text-gray-900 dark:text-white">
+                {editingContest ? "Edit Contest" : navItems.find(n => n.id === activeTab)?.label || "Submissions"}
+              </h1>
+              <p className="text-xs text-gray-400">Creator Dashboard</p>
             </div>
+          </div>
+          {canCreate.canCreate && (
+            <button onClick={() => { setActiveTab("add-contest"); setEditingContest(null); reset(); }}
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-bold rounded-xl transition-colors">
+              <FaPlus /> New Contest
+            </button>
+          )}
+        </header>
 
-            {contests.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="text-6xl mb-4">📝</div>
-                <h3 className="text-xl font-bold text-gray-800 mb-2">No Contests Yet</h3>
-                <p className="text-gray-600 mb-6">Create your first contest to get started!</p>
-                {canCreateContest.canCreate ? (
-                  <button
-                    onClick={() => setActiveTab("add-contest")}
-                    className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700"
-                  >
-                    Create Contest
-                  </button>
-                ) : (
-                  <div className="text-center">
-                    <button
-                      disabled
-                      className="bg-gray-400 text-white px-6 py-3 rounded-lg cursor-not-allowed mb-2"
-                    >
-                      Create Contest
-                    </button>
-                    <p className="text-red-600 text-sm">{canCreateContest.reason}</p>
-                    <a
-                      href="/packages"
-                      className="text-blue-600 hover:text-blue-700 text-sm underline"
-                    >
-                      View Packages
-                    </a>
+        <main className="flex-1 p-6 overflow-auto">
+          {/* Stats */}
+          <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-6">
+            {stats.map((c, i) => (
+              <div key={i} className="bg-white dark:bg-gray-900 rounded-2xl p-5 border border-gray-100 dark:border-gray-800 hover:shadow-lg transition-shadow">
+                <div className={`w-10 h-10 rounded-xl ${c.light} flex items-center justify-center ${c.text} text-sm mb-3`}>{c.icon}</div>
+                <p className="text-2xl font-black text-gray-900 dark:text-white">{c.value}</p>
+                <p className="text-xs text-gray-400 mt-1">{c.label}</p>
+              </div>
+            ))}
+          </div>
+
+          {/* Overview */}
+          {activeTab === "overview" && (
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
+                <h2 className="text-sm font-bold text-gray-900 dark:text-white">Recent Contests</h2>
+                <button onClick={() => setActiveTab("contests")} className="text-xs font-semibold text-blue-500">View All →</button>
+              </div>
+              <div className="divide-y divide-gray-50 dark:divide-gray-800">
+                {contests.slice(0, 5).map(c => (
+                  <div key={c._id} className="px-6 py-4 flex items-center justify-between hover:bg-gray-50 dark:hover:bg-gray-800/50">
+                    <div className="flex items-center gap-3">
+                      <img src={c.imageURL || "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=40"} alt={c.name} className="w-9 h-9 rounded-lg object-cover" />
+                      <div>
+                        <p className="text-sm font-semibold text-gray-900 dark:text-white">{c.name}</p>
+                        <p className="text-xs text-gray-400">{c.type} · {c.participants?.length || 0} participants</p>
+                      </div>
+                    </div>
+                    <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${c.status === "confirmed" ? "bg-emerald-100 text-emerald-600" : c.status === "rejected" ? "bg-red-100 text-red-600" : "bg-amber-100 text-amber-600"}`}>{c.status}</span>
                   </div>
-                )}
-              </div>
-            ) : (
-              <div className="overflow-x-auto">
-                <table className="w-full">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase">Contest</th>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase">Type</th>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase">Status</th>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase">Participants</th>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase">Prize</th>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase">Deadline</th>
-                      <th className="px-6 py-4 text-left text-sm font-medium text-gray-500 uppercase">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-gray-200">
-                    {contests.map((contest) => (
-                      <tr key={contest._id} className="hover:bg-gray-50">
-                        <td className="px-6 py-4">
-                          <div className="flex items-center">
-                            <img
-                              src={contest.imageURL || "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=60&h=60&fit=crop"}
-                              alt={contest.name}
-                              className="w-12 h-12 rounded-lg object-cover mr-4"
-                            />
-                            <div>
-                              <h4 className="font-medium text-gray-900">{contest.name}</h4>
-                              <p className="text-sm text-gray-500">{contest.description?.slice(0, 50)}...</p>
-                            </div>
-                          </div>
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-900">{contest.type}</td>
-                        <td className="px-6 py-4">
-                          <span className={`inline-flex px-2 py-1 text-xs font-semibold rounded-full ${contest.status === "confirmed"
-                              ? "bg-green-100 text-green-800"
-                              : contest.status === "rejected"
-                                ? "bg-red-100 text-red-800"
-                                : "bg-yellow-100 text-yellow-800"
-                            }`}>
-                            {contest.status}
-                          </span>
-                        </td>
-                        <td className="px-6 py-4 text-sm text-gray-900">{contest.participants?.length || 0}</td>
-                        <td className="px-6 py-4 text-sm font-medium text-green-600">${contest.prizeMoney}</td>
-                        <td className="px-6 py-4 text-sm text-gray-900">
-                          {new Date(contest.deadline).toLocaleDateString()}
-                        </td>
-                        <td className="px-6 py-4">
-                          <div className="flex gap-2">
-                            {contest.status === "pending" && (
-                              <>
-                                <button
-                                  onClick={() => handleEditClick(contest)}
-                                  className="bg-blue-100 text-blue-700 px-3 py-1 rounded text-sm hover:bg-blue-200"
-                                >
-                                  Edit
-                                </button>
-                                <button
-                                  onClick={() => handleDeleteContest(contest._id)}
-                                  className="bg-red-100 text-red-700 px-3 py-1 rounded text-sm hover:bg-red-200"
-                                >
-                                  Delete
-                                </button>
-                              </>
-                            )}
-                            {contest.status === "confirmed" && contest.participants?.length > 0 && (
-                              <button
-                                onClick={() => fetchSubmissions(contest._id)}
-                                className="bg-purple-100 text-purple-700 px-3 py-1 rounded text-sm hover:bg-purple-200"
-                              >
-                                See Submissions
-                              </button>
-                            )}
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Submissions Page */}
-        {activeTab === "submissions" && (
-          <div className="bg-white rounded-2xl shadow-lg">
-            <div className="p-6 border-b border-gray-200">
-              <div className="flex justify-between items-center">
-                <div>
-                  <h2 className="text-2xl font-bold text-gray-800">Contest Submissions</h2>
-                  <p className="text-gray-600 mt-1">Review and manage participant submissions</p>
-                </div>
-                <button
-                  onClick={() => setActiveTab("my-contests")}
-                  className="bg-gray-200 text-gray-700 px-4 py-2 rounded-lg hover:bg-gray-300"
-                >
-                  Back to Contests
-                </button>
+                ))}
               </div>
             </div>
+          )}
 
-            {submissions.length === 0 ? (
-              <div className="text-center py-12">
-                <div className="text-6xl mb-4">📝</div>
-                <h3 className="text-xl font-bold text-gray-800 mb-2">No Submissions Yet</h3>
-                <p className="text-gray-600">Participants haven't submitted their work yet.</p>
+          {/* Contests Table */}
+          {activeTab === "contests" && (
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800">
+                <h2 className="text-sm font-bold text-gray-900 dark:text-white">My Created Contests</h2>
               </div>
-            ) : (
-              <div className="p-6">
-                <div className="grid gap-6">
-                  {submissions.map((submission) => (
-                    <div key={submission._id} className="border border-gray-200 rounded-lg p-6 hover:shadow-md transition-shadow">
-                      <div className="flex justify-between items-start">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-4 mb-4">
-                            <img
-                              src={submission.user?.photoURL || "https://via.placeholder.com/50x50?text=User"}
-                              alt={submission.user?.name}
-                              className="w-12 h-12 rounded-full object-cover"
-                            />
-                            <div>
-                              <h4 className="font-bold text-gray-900">{submission.user?.name}</h4>
-                              <p className="text-sm text-gray-600">{submission.user?.email}</p>
+              {contests.length === 0 ? (
+                <div className="text-center py-16">
+                  <FaListAlt className="text-4xl text-gray-300 mx-auto mb-3" />
+                  <p className="text-sm text-gray-400 mb-4">No contests yet</p>
+                  {canCreate.canCreate
+                    ? <button onClick={() => setActiveTab("add-contest")} className="px-5 py-2 bg-blue-600 text-white text-sm font-bold rounded-xl">Create Contest</button>
+                    : <p className="text-xs text-red-500">{canCreate.reason}</p>}
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="bg-gray-50 dark:bg-gray-800/50">
+                        {["Contest", "Type", "Status", "Participants", "Prize", "Deadline", "Actions"].map(h => (
+                          <th key={h} className="px-6 py-3 text-left text-[10px] font-black text-gray-400 uppercase tracking-widest">{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-gray-50 dark:divide-gray-800">
+                      {contests.map(c => (
+                        <tr key={c._id} className="hover:bg-gray-50 dark:hover:bg-gray-800/30 transition-colors">
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                              <img src={c.imageURL || "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=40"} alt={c.name} className="w-10 h-10 rounded-lg object-cover" />
+                              <p className="text-sm font-semibold text-gray-900 dark:text-white">{c.name}</p>
                             </div>
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-500">{c.type}</td>
+                          <td className="px-6 py-4">
+                            <span className={`text-[10px] font-bold px-2.5 py-1 rounded-full ${c.status === "confirmed" ? "bg-emerald-100 text-emerald-600" : c.status === "rejected" ? "bg-red-100 text-red-600" : "bg-amber-100 text-amber-600"}`}>{c.status}</span>
+                          </td>
+                          <td className="px-6 py-4 text-sm text-gray-500">{c.participants?.length || 0}</td>
+                          <td className="px-6 py-4 text-sm font-bold text-emerald-600">${c.prizeMoney}</td>
+                          <td className="px-6 py-4 text-sm text-gray-500">{new Date(c.deadline).toLocaleDateString()}</td>
+                          <td className="px-6 py-4">
+                            <div className="flex gap-2">
+                              {c.status === "pending" && (
+                                <>
+                                  <button onClick={() => handleEditClick(c)} className="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors text-xs"><FaEdit /></button>
+                                  <button onClick={() => handleDelete(c._id)} className="p-2 bg-red-50 text-red-500 rounded-lg hover:bg-red-100 transition-colors text-xs"><FaTrash /></button>
+                                </>
+                              )}
+                              {c.status === "confirmed" && c.participants?.length > 0 && (
+                                <button onClick={() => fetchSubmissions(c._id)} className="px-3 py-1.5 bg-violet-50 text-violet-600 rounded-lg text-xs font-bold hover:bg-violet-100 transition-colors">
+                                  Submissions
+                                </button>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Add/Edit Contest Form */}
+          {activeTab === "add-contest" && (
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 p-8 max-w-3xl">
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6">
+                {editingContest ? "Edit Contest" : "Create New Contest"}
+              </h2>
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Contest Name *</label>
+                    <input {...register("name", { required: true })} className="w-full px-4 py-2.5 text-sm border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Enter contest name" />
+                    {errors.name && <p className="text-red-500 text-xs mt-1">Required</p>}
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Type *</label>
+                    <select {...register("type", { required: true })} className="w-full px-4 py-2.5 text-sm border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                      {contestTypes.map(t => <option key={t} value={t}>{t}</option>)}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Entry Price ($) *</label>
+                    <input type="number" {...register("price", { required: true, min: 0 })} className="w-full px-4 py-2.5 text-sm border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="0" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Prize Money ($) *</label>
+                    <input type="number" {...register("prizeMoney", { required: true, min: 0 })} className="w-full px-4 py-2.5 text-sm border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="0" />
+                  </div>
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Image URL</label>
+                  <input type="url" {...register("imageURL")} className="w-full px-4 py-2.5 text-sm border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="https://..." />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Description *</label>
+                  <textarea {...register("description", { required: true })} rows="3" className="w-full px-4 py-2.5 text-sm border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" placeholder="Describe your contest..." />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Task Instructions *</label>
+                  <textarea {...register("taskInstruction", { required: true })} rows="3" className="w-full px-4 py-2.5 text-sm border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none" placeholder="Instructions for participants..." />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Deadline *</label>
+                  <DatePicker selected={selectedDate} onChange={setSelectedDate} showTimeSelect timeFormat="HH:mm" timeIntervals={15} dateFormat="MMMM d, yyyy h:mm aa" minDate={new Date()}
+                    className="w-full px-4 py-2.5 text-sm border border-gray-200 dark:border-gray-700 rounded-xl bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-blue-500" />
+                </div>
+                <div className="flex gap-3 pt-2">
+                  <button type="submit" className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold rounded-xl transition-colors">
+                    {editingContest ? "Update Contest" : "Create Contest"}
+                  </button>
+                  <button type="button" onClick={() => { setActiveTab("contests"); setEditingContest(null); reset(); }} className="px-6 py-2.5 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-sm font-bold rounded-xl hover:bg-gray-200 transition-colors">
+                    Cancel
+                  </button>
+                </div>
+              </form>
+            </div>
+          )}
+
+          {/* Submissions */}
+          {activeTab === "submissions" && (
+            <div className="bg-white dark:bg-gray-900 rounded-2xl border border-gray-100 dark:border-gray-800 overflow-hidden">
+              <div className="px-6 py-4 border-b border-gray-100 dark:border-gray-800 flex items-center justify-between">
+                <h2 className="text-sm font-bold text-gray-900 dark:text-white">Submissions ({submissions.length})</h2>
+                <button onClick={() => setActiveTab("contests")} className="text-xs font-semibold text-blue-500">← Back</button>
+              </div>
+              {submissions.length === 0 ? (
+                <div className="text-center py-16 text-gray-400">
+                  <FaFileAlt className="text-4xl mx-auto mb-3 opacity-30" />
+                  <p className="text-sm">No submissions yet</p>
+                </div>
+              ) : (
+                <div className="divide-y divide-gray-50 dark:divide-gray-800">
+                  {submissions.map(s => (
+                    <div key={s._id} className="px-6 py-5 flex items-start justify-between gap-4 hover:bg-gray-50 dark:hover:bg-gray-800/30">
+                      <div className="flex items-start gap-4">
+                        <img src={s.user?.photoURL || "https://via.placeholder.com/40"} alt={s.user?.name} className="w-10 h-10 rounded-full object-cover" />
+                        <div>
+                          <p className="text-sm font-bold text-gray-900 dark:text-white">{s.user?.name}</p>
+                          <p className="text-xs text-gray-400 mb-2">{s.user?.email}</p>
+                          <div className="bg-gray-50 dark:bg-gray-800 rounded-xl px-4 py-3 text-sm text-gray-700 dark:text-gray-300 max-w-lg">
+                            {s.submissionLink}
                           </div>
-
-                          <div className="bg-gray-50 p-4 rounded-lg">
-                            <h5 className="font-medium text-gray-800 mb-2">Submitted Work:</h5>
-                            <p className="text-gray-700 whitespace-pre-wrap">{submission.submissionLink}</p>
-                          </div>
-
-                          <p className="text-sm text-gray-500 mt-3">
-                            Submitted: {new Date(submission.submittedAt).toLocaleString()}
-                          </p>
-                        </div>
-
-                        <div className="ml-6">
-                          <button
-                            onClick={() => handleDeclareWinner(selectedContestForSubmissions, submission.userId)}
-                            className="bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-6 py-2 rounded-lg font-semibold hover:from-yellow-500 hover:to-orange-600 transition-all"
-                          >
-                            🏆 Declare Winner
-                          </button>
+                          <p className="text-xs text-gray-400 mt-2">{new Date(s.submittedAt).toLocaleString()}</p>
                         </div>
                       </div>
+                      <button onClick={() => handleWinner(selectedContestId, s.userId)}
+                        className="flex items-center gap-2 px-4 py-2 bg-amber-500 hover:bg-amber-600 text-white text-xs font-bold rounded-xl transition-colors whitespace-nowrap">
+                        <FaTrophy /> Declare Winner
+                      </button>
                     </div>
                   ))}
                 </div>
-              </div>
-            )}
-          </div>
-        )}
+              )}
+            </div>
+          )}
+        </main>
       </div>
     </div>
   );

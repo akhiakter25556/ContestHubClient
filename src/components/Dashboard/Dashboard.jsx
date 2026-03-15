@@ -1,45 +1,20 @@
-import React, { useState, useEffect } from "react";
+import { useContext, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { AuthContext } from "../pages/Context/AuthContext";
 import AdminDashboard from "./AdminDashboard";
 import CreatorDashboard from "./CreatorDashboard";
 import UserDashboard from "./UserDashboard";
 
 export default function Dashboard() {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+  const { user, loading } = useContext(AuthContext);
+  const navigate = useNavigate();
 
+  // ✅ navigate must be inside useEffect, not during render
   useEffect(() => {
-    const fetchUserData = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        if (!token) {
-          window.location.href = "/login";
-          return;
-        }
-
-        const response = await fetch("https://contesthub-akhi.vercel.app/api/auth/me", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          setUser(data.user);
-        } else {
-          localStorage.removeItem("token");
-          window.location.href = "/login";
-        }
-      } catch (error) {
-        console.error("Failed to fetch user data:", error);
-        localStorage.removeItem("token");
-        window.location.href = "/login";
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchUserData();
-  }, []);
+    if (!loading && !user) {
+      navigate("/login");
+    }
+  }, [user, loading, navigate]);
 
   if (loading) {
     return (
@@ -49,16 +24,23 @@ export default function Dashboard() {
     );
   }
 
-  if (!user) {
-    return (
-      <div className="flex justify-center items-center min-h-96">
-        <p>Please login to access dashboard</p>
-      </div>
-    );
+  if (!user) return null;
+
+  // Firebase user-এ role নেই — JWT token থেকে নিন
+  // যদি token না থাকে, Firebase user হিসেবে "user" role দিন
+  let role = "user";
+  const token = localStorage.getItem("token");
+
+  if (token) {
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      role = payload.role || "user";
+    } catch {
+      role = "user";
+    }
   }
 
-  // Render dashboard based on user role
-  switch (user.role) {
+  switch (role) {
     case "admin":
       return <AdminDashboard user={user} />;
     case "creator":
