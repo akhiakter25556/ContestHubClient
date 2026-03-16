@@ -3,6 +3,31 @@ import MyParticipated from "./MyParticipated";
 import MyWinning from "./MyWinning";
 import MyProfile from "./MyProfile";
 import { io } from "socket.io-client";
+// Cloudinary upload helper
+const CLOUDINARY_CLOUD = "dmacfkxe6";
+const CLOUDINARY_PRESET = "contesthub_messages"; // unsigned preset — create this in Cloudinary dashboard
+
+async function uploadToCloudinary(file, onProgress) {
+  const formData = new FormData();
+  formData.append("file", file);
+  formData.append("upload_preset", CLOUDINARY_PRESET);
+  formData.append("folder", "messages");
+
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", `https://api.cloudinary.com/v1_1/${CLOUDINARY_CLOUD}/auto/upload`);
+    xhr.upload.onprogress = (e) => {
+      if (e.lengthComputable) onProgress(Math.round((e.loaded / e.total) * 100));
+    };
+    xhr.onload = () => {
+      const data = JSON.parse(xhr.responseText);
+      if (data.secure_url) resolve(data.secure_url);
+      else reject(new Error(data.error?.message || "Upload failed"));
+    };
+    xhr.onerror = () => reject(new Error("Network error"));
+    xhr.send(formData);
+  });
+}
 import {
   FaTrophy, FaMedal, FaChartLine, FaDollarSign,
   FaUser, FaListAlt, FaCrown, FaSignOutAlt,
@@ -10,7 +35,16 @@ import {
   FaChartBar, FaCog, FaHistory, FaSearch,
   FaPaperPlane, FaEllipsisV, FaSmile,
   FaMicrophone, FaCheckDouble, FaPlus,
+  FaPaperclip, FaStop, FaImage, FaFile, FaTimes as FaX,
 } from "react-icons/fa";
+
+// ── Emoji list ────────────────────────────────────────────────────
+const EMOJIS = [
+  "😀","😂","😍","🥰","😎","🤩","😭","😤","🥺","😏",
+  "👍","👎","❤️","🔥","🎉","✅","💯","🙏","💪","👏",
+  "😊","🤔","😴","🤣","😇","🤗","😈","👀","💀","🫡",
+  "🌟","💫","⚡","🎯","🚀","💥","🌈","🎊","🏆","🎁",
+];
 
 // ─────────────────────────────────────────────────────────────────
 // 🔧 SOCKET SINGLETON
@@ -75,6 +109,21 @@ function BarChart({ data }) {
 // ─────────────────────────────────────────────────────────────────
 function MessagesSection({ user }) {
   const userId = user?.uid;
+
+  // Emoji
+  const [showEmoji, setShowEmoji]       = useState(false);
+  // Voice
+  const [recording, setRecording]       = useState(false);
+  const [audioBlob, setAudioBlob]       = useState(null);
+  const [audioURL, setAudioURL]         = useState(null);
+  const [recordSecs, setRecordSecs]     = useState(0);
+  const mediaRecorderRef = useRef(null);
+  const audioChunksRef   = useRef([]);
+  const recordTimer      = useRef(null);
+  // File
+  const [uploading, setUploading]       = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
+  const fileInputRef = useRef(null);
 
   const [showNewMsg, setShowNewMsg]   = useState(false);
   const [userSearch, setUserSearch]   = useState("");
@@ -202,6 +251,87 @@ function MessagesSection({ user }) {
   const filtered = contacts.filter((c) =>
     c.name?.toLowerCase().includes(search.toLowerCase())
   );
+
+  // ── Emoji ────────────────────────────────────────────────────
+  const addEmoji = (emoji) => {
+    setInput((prev) => prev + emoji);
+    setShowEmoji(false);
+  };
+
+  // ── Voice recording ───────────────────────────────────────────
+  const startRecording = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const mr = new MediaRecorder(stream);
+      mediaRecorderRef.current = mr;
+      audioChunksRef.current = [];
+      mr.ondataavailable = (e) => audioChunksRef.current.push(e.data);
+      mr.onstop = () => {
+        const blob = new Blob(audioChunksRef.current, { type: "audio/webm" });
+        setAudioBlob(blob);
+        setAudioURL(URL.createObjectURL(blob));
+        stream.getTracks().forEach((t) => t.stop());
+      };
+      mr.start();
+      setRecording(true);
+      setRecordSecs(0);
+      recordTimer.current = setInterval(() => setRecordSecs((s) => s + 1), 1000);
+    } catch {
+      alert("Microphone permission denied!");
+    }
+  };
+
+  const stopRecording = () => {
+    mediaRecorderRef.current?.stop();
+    setRecording(false);
+    clearInterval(recordTimer.current);
+  };
+
+  const cancelVoice = () => {
+    setAudioBlob(null);
+    setAudioURL(null);
+    setRecordSecs(0);
+  };
+
+  const sendVoice = async () => {
+    if (!audioBlob || !selectedId) return;
+    setUploading(true);
+    try {
+      const file = new File([audioBlob], `voice_${Date.now()}.webm`, { type: "audio/webm" });
+      const url = await uploadToCloudinary(file, setUploadProgress);
+      const now = new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+      const msg = { id: Date.now(), from: "me", text: "", type: "voice", fileURL: url, time: now };
+      setMessages((prev) => ({ ...prev, [selectedId]: [...(prev[selectedId] || []), msg] }));
+      socketRef.current?.emit("send_message", { from: userId, to: selectedId, text: "", type: "voice", fileURL: url, time: now });
+      cancelVoice();
+    } catch (err) {
+      console.error("Voice upload error:", err);
+      alert("Voice upload failed: " + err.message);
+    }
+    setUploading(false);
+    setUploadProgress(0);
+  };
+
+  // ── File / Image upload ───────────────────────────────────────
+  const handleFileChange = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file || !selectedId) return;
+    setUploading(true);
+    try {
+      const url = await uploadToCloudinary(file, setUploadProgress);
+      const isImage = file.type.startsWith("image/");
+      const now = new Date().toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" });
+      const msg = { id: Date.now(), from: "me", text: file.name, type: isImage ? "image" : "file", fileURL: url, time: now };
+      setMessages((prev) => ({ ...prev, [selectedId]: [...(prev[selectedId] || []), msg] }));
+      socketRef.current?.emit("send_message", { from: userId, to: selectedId, text: file.name, type: isImage ? "image" : "file", fileURL: url, time: now });
+    } catch (err) {
+      console.error("File upload error:", err);
+      alert("File upload failed: " + err.message);
+    }
+    setUploading(false);
+    setUploadProgress(0);
+    e.target.value = "";
+  };
 
   // ── Search users to start new conversation ──────────────────
   const searchUsers = async (q) => {
@@ -410,12 +540,26 @@ function MessagesSection({ user }) {
                     {msg.from === "me" && <FaCheckDouble className="text-indigo-400" />}
                     {msg.time} · {msg.from === "me" ? "You" : selected?.name}
                   </span>
-                  <div className={`px-4 py-2.5 rounded-2xl text-sm leading-relaxed
+                  <div className={`rounded-2xl text-sm leading-relaxed overflow-hidden
                     ${msg.from === "me"
                       ? "bg-indigo-600 text-white rounded-br-sm"
                       : "bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200 border border-gray-100 dark:border-gray-700 rounded-bl-sm shadow-sm"
-                    }`}>
-                    {msg.text}
+                    } ${msg.type === "image" ? "p-0" : "px-4 py-2.5"}`}>
+                    {msg.type === "image" ? (
+                      <a href={msg.fileURL} target="_blank" rel="noreferrer">
+                        <img src={msg.fileURL} alt="img" className="max-w-[220px] max-h-[200px] object-cover rounded-2xl" />
+                      </a>
+                    ) : msg.type === "voice" ? (
+                      <audio controls src={msg.fileURL} className="h-8 max-w-[220px]" />
+                    ) : msg.type === "file" ? (
+                      <a href={msg.fileURL} target="_blank" rel="noreferrer"
+                        className="flex items-center gap-2 hover:opacity-80">
+                        <FaFile className="flex-shrink-0" />
+                        <span className="truncate max-w-[160px]">{msg.text}</span>
+                      </a>
+                    ) : (
+                      msg.text
+                    )}
                   </div>
                 </div>
               </div>
@@ -439,10 +583,72 @@ function MessagesSection({ user }) {
             <div ref={bottomRef} />
           </div>
 
+          {/* Emoji Picker */}
+          {showEmoji && (
+            <div className="px-4 pb-2 bg-white dark:bg-gray-900 border-t border-gray-100 dark:border-gray-800">
+              <div className="flex flex-wrap gap-1.5 p-2 bg-gray-50 dark:bg-gray-800 rounded-xl max-h-32 overflow-y-auto">
+                {EMOJIS.map((e, i) => (
+                  <button key={i} onClick={() => addEmoji(e)}
+                    className="text-xl hover:scale-125 transition-transform">
+                    {e}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Voice preview */}
+          {audioURL && (
+            <div className="px-4 pb-2 bg-white dark:bg-gray-900 flex items-center gap-3">
+              <audio controls src={audioURL} className="h-8 flex-1" />
+              <button onClick={cancelVoice} className="text-red-400 hover:text-red-600"><FaX /></button>
+              <button onClick={sendVoice} disabled={uploading}
+                className="w-8 h-8 bg-indigo-600 hover:bg-indigo-700 rounded-full flex items-center justify-center text-white">
+                <FaPaperPlane className="text-xs" />
+              </button>
+            </div>
+          )}
+
+          {/* Upload progress */}
+          {uploading && (
+            <div className="px-4 pb-1">
+              <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                <div className="h-full bg-indigo-500 transition-all rounded-full" style={{ width: `${uploadProgress}%` }} />
+              </div>
+              <p className="text-[10px] text-gray-400 mt-0.5">Uploading... {uploadProgress}%</p>
+            </div>
+          )}
+
           {/* Input Bar */}
-          <div className="px-4 py-3 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 flex items-center gap-3">
-            <button className="text-gray-400 hover:text-indigo-500 transition-colors text-lg flex-shrink-0"><FaSmile /></button>
-            <button className="text-gray-400 hover:text-indigo-500 transition-colors flex-shrink-0"><FaMicrophone /></button>
+          <div className="px-4 py-3 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-900 flex items-center gap-2">
+            {/* Emoji */}
+            <button
+              onClick={() => setShowEmoji((v) => !v)}
+              className={`text-lg flex-shrink-0 transition-colors ${showEmoji ? "text-indigo-500" : "text-gray-400 hover:text-indigo-500"}`}>
+              <FaSmile />
+            </button>
+
+            {/* File upload */}
+            <input ref={fileInputRef} type="file" accept="image/*,application/pdf,.doc,.docx,.txt"
+              className="hidden" onChange={handleFileChange} />
+            <button onClick={() => fileInputRef.current?.click()}
+              className="text-gray-400 hover:text-indigo-500 transition-colors flex-shrink-0">
+              <FaPaperclip />
+            </button>
+
+            {/* Voice */}
+            {recording ? (
+              <button onClick={stopRecording}
+                className="flex items-center gap-1.5 text-red-500 flex-shrink-0 text-sm font-medium animate-pulse">
+                <FaStop /> {recordSecs}s
+              </button>
+            ) : (
+              <button onClick={startRecording}
+                className="text-gray-400 hover:text-indigo-500 transition-colors flex-shrink-0">
+                <FaMicrophone />
+              </button>
+            )}
+
             <input
               value={input}
               onChange={handleInputChange}
